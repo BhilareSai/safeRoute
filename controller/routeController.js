@@ -4,12 +4,12 @@ import Review from "../models/safeRoutes.js";
 /**
  * Enhanced analyzeRouteSafety controller with detailed segment analysis for all routes
  * This function processes routes and provides comprehensive safety information with explanations
+ * Optimized to minimize database queries
  */
 export const analyzeRouteSafety = asyncErrorHandler(async (req, res) => {
   try {
     const { timeOfDay, routes } = req.body;
 
-    // Validate that routes are provided
     if (!routes || !Array.isArray(routes) || routes.length === 0) {
       return res.status(400).json({ error: "At least one route is required" });
     }
@@ -27,6 +27,54 @@ export const analyzeRouteSafety = asyncErrorHandler(async (req, res) => {
     if (timeOfDay) {
       options.timeOfDay = new Date(timeOfDay);
     }
+
+    // Extract all route points to find bounding box
+    const allPoints = routes.flat();
+
+    // Calculate bounding box for all routes with buffer for search radius
+    // Convert search radius from meters to approximate degrees
+    const searchRadiusInDegrees = options.searchRadius / 111000;
+
+    // Find min/max coordinates across all routes
+    const minLat =
+      Math.min(...allPoints.map((p) => parseFloat(p.latitude))) -
+      searchRadiusInDegrees;
+    const maxLat =
+      Math.max(...allPoints.map((p) => parseFloat(p.latitude))) +
+      searchRadiusInDegrees;
+    const minLon =
+      Math.min(...allPoints.map((p) => parseFloat(p.longitude))) -
+      searchRadiusInDegrees;
+    const maxLon =
+      Math.max(...allPoints.map((p) => parseFloat(p.longitude))) +
+      searchRadiusInDegrees;
+
+    // Build query to fetch all needed reviews at once
+    const dateFilter = {};
+    if (options.timeOfDay) {
+      const timeOfDay = new Date(options.timeOfDay);
+      const startHour = new Date(timeOfDay);
+      startHour.setHours(timeOfDay.getHours() - 2);
+      const endHour = new Date(timeOfDay);
+      endHour.setHours(timeOfDay.getHours() + 2);
+      dateFilter.userDateTime = { $gte: startHour, $lte: endHour };
+    }
+
+    // Single database query to fetch all reviews in the area
+    const allReviews = await Review.find({
+      lat: { $gte: minLat.toString(), $lte: maxLat.toString() },
+      lon: { $gte: minLon.toString(), $lte: maxLon.toString() },
+      ...dateFilter,
+    })
+      .lean()
+      .exec();
+
+    console.log(
+      `Fetched ${allReviews.length} reviews in single query for all routes`
+    );
+
+    // Create spatial index for faster lookups
+    const reviewSpatialIndex = createSpatialIndex(allReviews);
 
     // Analyze safety for each provided route
     const routeSafetyPromises = routes.map(async (route, index) => {
@@ -59,12 +107,13 @@ export const analyzeRouteSafety = asyncErrorHandler(async (req, res) => {
           longitude: parseFloat(point.longitude),
         }));
 
-      // Calculate safety scores for this route
+      // Calculate safety scores for this route using the pre-fetched reviews
       const routeSafety = await findSafestRoute(
         routeSource,
         routeDestination,
         intermediatePoints,
-        options
+        options,
+        reviewSpatialIndex
       );
 
       // Categorize segments by safety level
@@ -185,6 +234,52 @@ export const analyzeRouteSafety = asyncErrorHandler(async (req, res) => {
     });
   }
 });
+
+/**
+ * Creates a spatial index for fast lookup of reviews near points
+ * @param {Array} reviews - Array of review objects with lat and lon
+ * @returns {Object} - Spatial index for fast lookups
+ */
+function createSpatialIndex(reviews) {
+  // Create a simple grid-based spatial index
+  const index = {
+    reviews: reviews,
+    // Function to find reviews near a point
+    findNearby: function (lat, lon, radiusInDegrees) {
+      // Simple distance filter using bounding box first
+      const minLat = lat - radiusInDegrees;
+      const maxLat = lat + radiusInDegrees;
+      const minLon = lon - radiusInDegrees;
+      const maxLon = lon + radiusInDegrees;
+
+      // First-pass filtering using bounding box
+      const candidates = this.reviews.filter((review) => {
+        const reviewLat = parseFloat(review.lat);
+        const reviewLon = parseFloat(review.lon);
+        return (
+          reviewLat >= minLat &&
+          reviewLat <= maxLat &&
+          reviewLon >= minLon &&
+          reviewLon <= maxLon
+        );
+      });
+
+      // Second-pass filtering using actual distance calculation
+      return candidates.filter((review) => {
+        const distance =
+          calculateDistance(
+            { lat, lon },
+            { lat: parseFloat(review.lat), lon: parseFloat(review.lon) }
+          ) * 1000; // Convert to meters
+
+        // Return reviews within the search radius
+        return distance <= radiusInDegrees * 111000; // Convert to meters
+      });
+    },
+  };
+
+  return index;
+}
 
 /**
  * Creates enhanced segment analysis with detailed safety information
@@ -845,13 +940,15 @@ function getTimeOfDayDescription(dateTime) {
  * @param {Object} destination - Destination point with coordinates and name
  * @param {Array} intermediatePoints - Array of intermediate points
  * @param {Object} options - Options for safety analysis
+ * @param {Object} reviewSpatialIndex - Spatial index of pre-fetched reviews
  * @returns {Object} - Complete route safety analysis
  */
 async function findSafestRoute(
   source,
   destination,
   intermediatePoints,
-  options = {}
+  options = {},
+  reviewSpatialIndex
 ) {
   try {
     // Default options
@@ -873,11 +970,15 @@ async function findSafestRoute(
       { ...destination, type: "Destination" },
     ];
 
-    // Calculate safety scores for each point in the route
+    // Calculate safety scores for each point in the route using pre-fetched reviews
     const routeWithSafetyScores = await Promise.all(
       fullRoute.map(async (point, index) => {
-        // Calculate safety score for this point
-        const safetyData = await calculateSafetyScore(point, config);
+        // Calculate safety score for this point using reviewSpatialIndex
+        const safetyData = calculateSafetyScore(
+          point,
+          config,
+          reviewSpatialIndex
+        );
 
         // If this isn't the last point, calculate the "edge" safety to the next point
         let edgeSafety = null;
@@ -979,51 +1080,56 @@ async function findSafestRoute(
 }
 
 /**
- * Calculates safety score for a specific point based on nearby reviews
+ * Finds top segments by a specific metric
+ * @param {Array} route - Array of route points with safety data
+ * @param {String} metric - Metric to sort by
+ * @param {Number} count - Number of segments to return
+ * @param {Boolean} highest - Whether to find highest (true) or lowest (false)
+ * @returns {Array} - Top segments by metric
+ */
+function findTopSegmentsByMetric(route, metric, count, highest = true) {
+  // Filter for points with edge safety
+  const segments = route.filter((point) => point.edgeSafety);
+
+  // Sort by metric
+  segments.sort((a, b) => {
+    const aValue = a.edgeSafety[metric];
+    const bValue = b.edgeSafety[metric];
+
+    return highest ? bValue - aValue : aValue - bValue;
+  });
+
+  // Return top segments
+  return segments.slice(0, count).map((point) => ({
+    fromName: point.name,
+    toName: route[point.edgeSafety.toIndex].name,
+    value: point.edgeSafety[metric],
+    distance: point.edgeSafety.distance,
+  }));
+}
+
+/**
+ * Calculates safety score for a specific point based on nearby reviews from spatial index
  * @param {Object} point - Point with latitude and longitude
  * @param {Object} config - Configuration options for safety calculation
+ * @param {Object} reviewSpatialIndex - Spatial index with pre-fetched reviews
  * @returns {Object} - Safety data for the point
  */
-async function calculateSafetyScore(point, config) {
+function calculateSafetyScore(point, config, reviewSpatialIndex) {
   try {
     // Convert latitude and longitude to numbers
     const latitude = parseFloat(point.latitude);
     const longitude = parseFloat(point.longitude);
 
-    // Search for reviews near this point (within config.searchRadius meters)
-    // Using MongoDB's geospatial queries with maxDistance
-    const searchRadiusInDegrees = config.searchRadius / 111000; // Rough conversion from meters to degrees
+    // Convert search radius from meters to approximate degrees
+    const searchRadiusInDegrees = config.searchRadius / 111000;
 
-    // Filter for date if timeOfDay is specified
-    const dateFilter = {};
-    if (config.timeOfDay) {
-      const timeOfDay = new Date(config.timeOfDay);
-
-      // Create a time range (±2 hours from specified time)
-      const startHour = new Date(timeOfDay);
-      startHour.setHours(timeOfDay.getHours() - 2);
-
-      const endHour = new Date(timeOfDay);
-      endHour.setHours(timeOfDay.getHours() + 2);
-
-      dateFilter.userDateTime = {
-        $gte: startHour,
-        $lte: endHour,
-      };
-    }
-
-    // Query for reviews near this point
-    const nearbyReviews = await Review.find({
-      lat: {
-        $gte: (latitude - searchRadiusInDegrees).toString(),
-        $lte: (latitude + searchRadiusInDegrees).toString(),
-      },
-      lon: {
-        $gte: (longitude - searchRadiusInDegrees).toString(),
-        $lte: (longitude + searchRadiusInDegrees).toString(),
-      },
-      ...dateFilter,
-    }).exec();
+    // Use spatial index to find nearby reviews efficiently
+    const nearbyReviews = reviewSpatialIndex.findNearby(
+      latitude,
+      longitude,
+      searchRadiusInDegrees
+    );
 
     // If no reviews found, return a default low confidence safety score
     if (nearbyReviews.length === 0) {
@@ -1127,23 +1233,20 @@ async function calculateSafetyScore(point, config) {
 }
 
 /**
- * Calculates distance between two geographical points
+ * Calculates the distance between two geographical points using the Haversine formula
  * @param {Object} point1 - First point with lat and lon properties
  * @param {Object} point2 - Second point with lat and lon properties
  * @returns {Number} - Distance in kilometers
  */
 function calculateDistance(point1, point2) {
-  // Using Haversine formula for calculating distance
   const R = 6371; // Earth's radius in km
-  const dLat =
-    ((parseFloat(point2.lat) - parseFloat(point1.lat)) * Math.PI) / 180;
-  const dLon =
-    ((parseFloat(point2.lon) - parseFloat(point1.lon)) * Math.PI) / 180;
+  const dLat = (point2.lat - point1.lat) * (Math.PI / 180);
+  const dLon = (point2.lon - point1.lon) * (Math.PI / 180);
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((parseFloat(point1.lat) * Math.PI) / 180) *
-      Math.cos((parseFloat(point2.lat) * Math.PI) / 180) *
+    Math.cos(point1.lat * (Math.PI / 180)) *
+      Math.cos(point2.lat * (Math.PI / 180)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
 
@@ -1151,45 +1254,6 @@ function calculateDistance(point1, point2) {
   const distance = R * c; // Distance in km
 
   return distance;
-}
-
-/**
- * Finds top segments based on a specific metric
- * @param {Array} route - Array of route points with safety data
- * @param {String} metric - Metric to evaluate (e.g., "safetyScore")
- * @param {Number} count - Number of segments to return
- * @param {Boolean} descending - Whether to sort in descending order
- * @returns {Array} - Top segments based on metric
- */
-function findTopSegmentsByMetric(route, metric, count, descending = true) {
-  const segments = route
-    .filter((point) => point.edgeSafety)
-    .map((point) => ({
-      fromName:
-        point.name || `Point at (${point.latitude}, ${point.longitude})`,
-      toName:
-        route[point.edgeSafety.toIndex].name ||
-        `Point at (${route[point.edgeSafety.toIndex].latitude}, ${
-          route[point.edgeSafety.toIndex].longitude
-        })`,
-      metricValue: point.edgeSafety[metric],
-      distance: point.edgeSafety.distance,
-      safetyFactors: {
-        policePresence: point.safetyData.factors.police_presence,
-        streetLights: point.safetyData.factors.street_lights,
-        peopleDensity: point.safetyData.factors.people_density,
-        traffic: point.safetyData.factors.traffic,
-      },
-    }));
-
-  // Sort by the metric
-  segments.sort((a, b) => {
-    return descending
-      ? b.metricValue - a.metricValue
-      : a.metricValue - b.metricValue;
-  });
-
-  return segments.slice(0, count);
 }
 
 // Export route insertion and route safety analysis controllers
@@ -1227,5 +1291,283 @@ export const insertRouteReview = asyncErrorHandler(async (req, res) => {
   const newRoute = await route.save();
   res.status(201).json(newRoute);
 });
+
+export const generateMockReviews = asyncErrorHandler(async (req, res) => {
+  try {
+    // Get parameters from request
+    const {
+      routesCount = 3,
+      reviewsPerRouteMin = 10,
+      reviewsPerRouteMax = 30,
+      clearExisting = false,
+      routes,
+    } = req.body;
+
+    // Clear existing reviews if requested
+    if (clearExisting) {
+      await Review.deleteMany({});
+      console.log("Cleared existing reviews");
+    }
+
+    // Sample route coordinates (can be replaced with actual routes)
+
+    // If provided routes count is less than 3, use first N routes
+    const selectedRoutes = routes.slice(0, routesCount);
+
+    // Safety profiles based on route index
+    const safetyProfiles = [
+      {
+        // Route 1 - High Safety
+        safetyRange: [7, 9],
+        policePresence: ["moderate", "high"],
+        streetLights: ["moderate", "high"],
+        peopleDensity: ["moderate", "high"],
+        traffic: ["low", "moderate"],
+      },
+      {
+        // Route 2 - Low Safety
+        safetyRange: [2, 5],
+        policePresence: ["none", "low"],
+        streetLights: ["none", "low"],
+        peopleDensity: ["none", "low"],
+        traffic: ["low", "high"],
+      },
+      {
+        // Route 3 - Moderate Safety
+        safetyRange: [4, 7],
+        policePresence: ["low", "moderate"],
+        streetLights: ["low", "moderate"],
+        peopleDensity: ["low", "moderate"],
+        traffic: ["moderate", "high"],
+      },
+    ];
+
+    // User IDs for mock data
+    const userIds = ["user123", "user456", "user789", "user101", "user202"];
+
+    // Generate time periods (for time-based analysis)
+    const timePeriods = [
+      // Morning (6 AM - 11 AM)
+      { name: "morning", hours: [6, 7, 8, 9, 10, 11] },
+      // Afternoon (12 PM - 5 PM)
+      { name: "afternoon", hours: [12, 13, 14, 15, 16, 17] },
+      // Evening (6 PM - 9 PM)
+      { name: "evening", hours: [18, 19, 20, 21] },
+      // Night (10 PM - 5 AM)
+      { name: "night", hours: [22, 23, 0, 1, 2, 3, 4, 5] },
+    ];
+
+    // Generate mock dates (for recency testing)
+    const generateDate = () => {
+      const now = new Date();
+      const randomDays = Math.floor(Math.random() * 120); // 0 to 120 days ago
+      const date = new Date(now);
+      date.setDate(date.getDate() - randomDays);
+      return date;
+    };
+
+    // Generate a random time based on time period
+    const generateTime = (period) => {
+      const date = generateDate();
+      const hourIndex = Math.floor(Math.random() * period.hours.length);
+      date.setHours(
+        period.hours[hourIndex],
+        Math.floor(Math.random() * 60),
+        0,
+        0
+      );
+      return date;
+    };
+
+    // Helper to get random element from array
+    const getRandomElement = (array) => {
+      return array[Math.floor(Math.random() * array.length)];
+    };
+
+    // Helper to get random number in range (inclusive)
+    const getRandomInRange = (min, max) => {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+
+    // Generate minor variations around a coordinate to simulate multiple reviews nearby
+    const getVariedCoordinate = (coordinate) => {
+      // Generate a small random offset (approximately within 10-50 meters)
+      const variation = (Math.random() - 0.5) * 0.001; // Roughly 50-100m in decimal degrees
+      return (parseFloat(coordinate) + variation).toFixed(6);
+    };
+
+    // Generate reviews for each route
+    const allReviews = [];
+    for (let routeIndex = 0; routeIndex < selectedRoutes.length; routeIndex++) {
+      const route = selectedRoutes[routeIndex];
+      const safetyProfile = safetyProfiles[routeIndex % safetyProfiles.length]; // Use modulo in case more routes
+
+      // Determine how many reviews to generate for this route
+      const reviewsCount = getRandomInRange(
+        reviewsPerRouteMin,
+        reviewsPerRouteMax
+      );
+
+      // Generate reviews per point in route
+      for (let pointIndex = 0; pointIndex < route.length; pointIndex++) {
+        const point = route[pointIndex];
+
+        // Add some variation to reviews for this point based on position in route
+        // For instance, unsafe route might have a safer segment or vice versa
+        let pointSafetyModifier = 0;
+
+        // Create a safety variation pattern (e.g., safe route with an unsafe segment)
+        if (routeIndex === 0 && pointIndex === 2) {
+          // Safe route with a moderately risky middle segment
+          pointSafetyModifier = -2;
+        } else if (routeIndex === 1 && pointIndex === 0) {
+          // Unsafe route with a safe starting point
+          pointSafetyModifier = 3;
+        } else if (routeIndex === 2 && pointIndex === 3) {
+          // Moderate route with an unsafe segment
+          pointSafetyModifier = -2;
+        }
+
+        // Reviews per point (distribute the total reviews across points)
+        const reviewsForPoint = Math.max(
+          1,
+          Math.floor(reviewsCount / route.length)
+        );
+
+        for (let i = 0; i < reviewsForPoint; i++) {
+          // Generate time of day for this review (more reviews at night for unsafe areas)
+          const timePeriodWeight = Math.random();
+          let timePeriod;
+
+          if (routeIndex === 1) {
+            // Unsafe route has more night reviews
+            timePeriod =
+              timePeriodWeight < 0.6
+                ? timePeriods[3]
+                : getRandomElement(timePeriods);
+          } else if (routeIndex === 0) {
+            // Safe route has more day reviews
+            timePeriod =
+              timePeriodWeight < 0.6
+                ? timePeriods[1]
+                : getRandomElement(timePeriods);
+          } else {
+            // Moderate route has even distribution
+            timePeriod = getRandomElement(timePeriods);
+          }
+
+          // Some night reviews should show lower safety levels
+          const timeOfDayModifier = timePeriod.name === "night" ? -1 : 0;
+
+          // Calculate a realistic safety rating for this review based on route and modifiers
+          const [minSafety, maxSafety] = safetyProfile.safetyRange;
+          let safetyRating =
+            getRandomInRange(minSafety, maxSafety) +
+            pointSafetyModifier +
+            timeOfDayModifier;
+
+          // Keep within 1-10 range
+          safetyRating = Math.max(1, Math.min(10, safetyRating));
+
+          // Select factors based on safety profile and rating
+          const getFactorLevel = (factorOptions, safetyRating) => {
+            // Higher safety ratings get better factor levels
+            const threshold = safetyRating >= 6 ? 0.7 : 0.3;
+            return Math.random() < threshold
+              ? factorOptions[1]
+              : factorOptions[0];
+          };
+
+          const review = {
+            lat: getVariedCoordinate(point.latitude),
+            lon: getVariedCoordinate(point.longitude),
+            safetyRating: safetyRating,
+            police_presence: getFactorLevel(
+              safetyProfile.policePresence,
+              safetyRating
+            ),
+            street_lights: getFactorLevel(
+              safetyProfile.streetLights,
+              safetyRating
+            ),
+            people_density: getFactorLevel(
+              safetyProfile.peopleDensity,
+              safetyRating
+            ),
+            traffic: getFactorLevel(safetyProfile.traffic, safetyRating),
+            user_id: getRandomElement(userIds),
+            userDateTime: generateTime(timePeriod).toISOString(),
+            // Add metadata for tracking
+            _meta: {
+              routeIndex: routeIndex,
+              pointIndex: pointIndex,
+              timePeriod: timePeriod.name,
+            },
+          };
+
+          allReviews.push(review);
+        }
+      }
+    }
+
+    // Remove _meta field before saving (as it's not in the schema)
+    const reviewsToSave = allReviews.map(({ _meta, ...review }) => review);
+
+    // Save the reviews to the database
+    await Review.insertMany(reviewsToSave);
+
+    // Generate summary statistics
+    const routeStats = Array(selectedRoutes.length)
+      .fill()
+      .map(() => ({
+        totalReviews: 0,
+        avgSafetyRating: 0,
+        reviewsByTimePeriod: {
+          morning: 0,
+          afternoon: 0,
+          evening: 0,
+          night: 0,
+        },
+      }));
+
+    // Calculate statistics
+    allReviews.forEach((review) => {
+      const { routeIndex, timePeriod } = review._meta;
+
+      routeStats[routeIndex].totalReviews++;
+      routeStats[routeIndex].avgSafetyRating += review.safetyRating;
+      routeStats[routeIndex].reviewsByTimePeriod[timePeriod]++;
+    });
+
+    // Finalize statistics
+    routeStats.forEach((stats) => {
+      if (stats.totalReviews > 0) {
+        stats.avgSafetyRating = parseFloat(
+          (stats.avgSafetyRating / stats.totalReviews).toFixed(2)
+        );
+      }
+    });
+
+    // Return summary of the generated data
+    return res.status(201).json({
+      success: true,
+      message: `Generated ${allReviews.length} mock reviews across ${selectedRoutes.length} routes`,
+      routeStats: routeStats,
+      sampleReviews: allReviews.slice(0, 5), // Return first 5 reviews as samples
+    });
+  } catch (error) {
+    console.error("Error generating mock reviews:", error);
+    return res.status(500).json({
+      error: "Failed to generate mock review data",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Generate simulated route objects with additional data for testing route analyzes
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ */
 
 // Helper functions for generating safety analysis explanations
