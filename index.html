@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Finder with Intermediate Places</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #4285F4;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-row .input-group {
+            flex: 1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="text"] {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4285F4;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+
+        .options-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .option-group label {
+            margin-left: 5px;
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        button {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3367D6;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        #map {
+            height: 500px;
+            flex: 1;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .places-container {
+            flex: 0 0 350px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .route-selector {
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .route-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .places-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .place-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .place-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .place-item h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .place-item p {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .coordinates {
+            font-family: monospace;
+            font-size: 12px;
+            color: #4285F4;
+            background-color: #f0f6ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .start-place {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .end-place {
+            border-left: 4px solid #F44336;
+        }
+
+        .intermediate-place {
+            border-left: 4px solid #FFC107;
+        }
+
+        .summary-box {
+            margin-top: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-flex {
+            display: flex;
+            gap: 20px;
+        }
+
+        .summary-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .summary-item h3 {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .summary-item p {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4285F4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            #map {
+                height: 300px;
+            }
+
+            .places-container {
+                flex: auto;
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Route Finder with Intermediate Places</h1>
+            <p>Find all places along your journey from source to destination</p>
+        </header>
+
+        <div class="search-container">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="source">Starting Point</label>
+                    <input type="text" id="source" placeholder="Enter source location...">
+                </div>
+
+                <div class="input-group">
+                    <label for="destination">Destination</label>
+                    <input type="text" id="destination" placeholder="Enter destination location...">
+                </div>
+            </div>
+
+            <div class="options-container">
+                <div class="option-group">
+                    <input type="radio" id="drivingMode" name="travelMode" value="DRIVING" checked>
+                    <label for="drivingMode">Driving</label>
+                </div>
+
+                <div class="option-group">
+                    <input type="radio" id="walkingMode" name="travelMode" value="WALKING">
+                    <label for="walkingMode">Walking</label>
+                </div>
+
+                <div class="option-group">
+                    <input type="radio" id="transitMode" name="travelMode" value="TRANSIT">
+                    <label for="transitMode">Transit</label>
+                </div>
+
+                <div class="option-group">
+                    <input type="radio" id="bicyclingMode" name="travelMode" value="BICYCLING">
+                    <label for="bicyclingMode">Bicycling</label>
+                </div>
+
+                <div class="option-group">
+                    <input type="checkbox" id="avoidHighways">
+                    <label for="avoidHighways">Avoid Highways</label>
+                </div>
+
+                <div class="option-group">
+                    <input type="checkbox" id="avoidTolls">
+                    <label for="avoidTolls">Avoid Tolls</label>
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button id="findRouteBtn">Find Route</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="loading-spinner"></div>
+            <p>Finding routes and places...</p>
+        </div>
+
+        <div class="main-content" id="resultsContainer" style="display: none;">
+            <div id="map"></div>
+
+            <div class="places-container">
+                <div class="route-selector">
+                    <select id="routeSelector">
+                        <option value="0">Primary Route</option>
+                    </select>
+                    <button id="exportCoordsBtn"
+                        style="margin-top: 10px; width: 100%; padding: 8px; background-color: #34A853; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                        Export Coordinates
+                    </button>
+                </div>
+
+                <div class="places-list" id="placesList">
+                    <!-- Places will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-box" id="summaryBox" style="display: none;">
+            <div class="summary-flex">
+                <div class="summary-item">
+                    <h3>Total Distance</h3>
+                    <p id="totalDistance">0 km</p>
+                </div>
+
+                <div class="summary-item">
+                    <h3>Estimated Time</h3>
+                    <p id="estimatedTime">0 min</p>
+                </div>
+
+                <div class="summary-item">
+                    <h3>Places Along Route</h3>
+                    <p id="placesCount">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let placesService;
+        let routes = [];
+        let markers = [];
+
+        // Initialize the map when Google Maps API loads
+        function initMap() {
+            // Create map centered on US
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 40.7128, lng: -74.0060 }, // New York coordinates
+                zoom: 4
+            });
+
+            // Initialize Google Maps services
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true // We'll create our own markers
+            });
+            placesService = new google.maps.places.PlacesService(map);
+
+            // Initialize autocomplete for input fields
+            const sourceInput = document.getElementById('source');
+            const destinationInput = document.getElementById('destination');
+
+            new google.maps.places.Autocomplete(sourceInput);
+            new google.maps.places.Autocomplete(destinationInput);
+
+            // Add event listener to the Find Route button
+            document.getElementById('findRouteBtn').addEventListener('click', findRoute);
+
+            // Add event listener to the route selector dropdown
+            document.getElementById('routeSelector').addEventListener('change', function () {
+                const selectedRouteIndex = parseInt(this.value);
+                displayRoute(selectedRouteIndex);
+            });
+
+            // Add event listener to the export coordinates button
+            document.getElementById('exportCoordsBtn').addEventListener('click', exportCoordinates);
+        }
+
+        // Find all possible routes between source and destination
+        function findRoute() {
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('summaryBox').style.display = 'none';
+
+            // Clear previous routes and markers
+            routes = [];
+            clearMarkers();
+
+            // Get input values
+            const source = document.getElementById('source').value;
+            const destination = document.getElementById('destination').value;
+
+            // Validate input
+            if (!source || !destination) {
+                alert('Please enter both source and destination locations.');
+                document.getElementById('loadingIndicator').style.display = 'none';
+                return;
+            }
+
+            // Get travel mode
+            const travelModeElements = document.getElementsByName('travelMode');
+            let travelMode;
+            for (const element of travelModeElements) {
+                if (element.checked) {
+                    travelMode = element.value;
+                    break;
+                }
+            }
+
+            // Get other options
+            const avoidHighways = document.getElementById('avoidHighways').checked;
+            const avoidTolls = document.getElementById('avoidTolls').checked;
+
+            // Create request object
+            const request = {
+                origin: source,
+                destination: destination,
+                travelMode: google.maps.TravelMode[travelMode],
+                provideRouteAlternatives: true,
+                avoidHighways: avoidHighways,
+                avoidTolls: avoidTolls
+            };
+
+            // Make the directions request
+            directionsService.route(request, (response, status) => {
+                if (status === google.maps.DirectionsStatus.OK) {
+                    // Process routes and extract places
+                    processRoutes(response);
+
+                    // Display the first route
+                    displayRoute(0);
+
+                    // Populate route selector dropdown
+                    populateRouteSelector(routes.length);
+
+                    // Show results container
+                    document.getElementById('resultsContainer').style.display = 'flex';
+                    document.getElementById('summaryBox').style.display = 'block';
+                } else {
+                    alert(`Error finding route: ${status}`);
+                }
+
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+            });
+        }
+
+        // Process routes to extract all intermediate places
+    function processRoutes(response) {
+        response.routes.forEach((route, routeIndex) => {
+            const routeInfo = {
+                routeIndex: routeIndex,
+                summary: route.summary,
+                distance: calculateTotalDistance(route),
+                duration: calculateTotalDuration(route),
+                legs: [],
+                allIntermediatePlaces: []
+            };
+
+            // Get the start location (first point)
+            const firstLeg = route.legs[0];
+            const startLocation = {
+                name: "Starting Point",
+                position: {
+                    lat: firstLeg.start_location.lat(),
+                    lng: firstLeg.start_location.lng()
+                },
+                isWaypoint: true,
+                isStart: true,
+                isEnd: false
+            };
+            routeInfo.allIntermediatePlaces.push(startLocation);
+
+            // Process each leg of the route
+            route.legs.forEach((leg, legIndex) => {
+                const legInfo = {
+                    legIndex: legIndex,
+                    startAddress: leg.start_address,
+                    endAddress: leg.end_address,
+                    distance: leg.distance.text,
+                    duration: leg.duration.text
+                };
+
+                // Process steps to get the path
+                leg.steps.forEach((step) => {
+                    // Get the decoded path for this step
+                    const path = google.maps.geometry.encoding.decodePath(step.polyline.points);
+                    samplePointsAlongPath(path, 200, routeInfo.allIntermediatePlaces);
+                });
+
+                routeInfo.legs.push(legInfo);
+            });
+
+            // Get the end location (last point)
+            const lastLeg = route.legs[route.legs.length - 1];
+            const endLocation = {
+                name: "Destination",
+                position: {
+                    lat: lastLeg.end_location.lat(),
+                    lng: lastLeg.end_location.lng()
+                },
+                isWaypoint: true,
+                isStart: false,
+                isEnd: true
+            };
+            routeInfo.allIntermediatePlaces.push(endLocation);
+
+            // Remove duplicate points (there might be overlaps at step boundaries)
+            routeInfo.allIntermediatePlaces = removeDuplicatePlaces(routeInfo.allIntermediatePlaces);
+
+            routes.push(routeInfo);
+        });
+    }
+
+    // Function to sample points at regular distance intervals along a path
+    function samplePointsAlongPath(path, bufferDistanceMeters, pointsArray) {
+        if (path.length < 2) return;
+
+        let totalDistance = 0;
+        let lastSampledDistance = 0;
+
+        // Process each segment in the path
+        for (let i = 0; i < path.length - 1; i++) {
+            const point1 = path[i];
+            const point2 = path[i + 1];
+
+            // Calculate distance of this segment in meters
+            const segmentDistance = google.maps.geometry.spherical.computeDistanceBetween(point1, point2);
+
+            // Check if we need to sample points in this segment
+            while (lastSampledDistance + bufferDistanceMeters <= totalDistance + segmentDistance) {
+                // Calculate how far along this segment we need to go to reach the next sample point
+                const distanceFromSegmentStart = (lastSampledDistance + bufferDistanceMeters) - totalDistance;
+                const fraction = distanceFromSegmentStart / segmentDistance;
+
+                // Interpolate to find the exact position
+                const sampleLat = point1.lat() + (point2.lat() - point1.lat()) * fraction;
+                const sampleLng = point1.lng() + (point2.lng() - point1.lng()) * fraction;
+
+                // Create a new point
+                const samplePoint = {
+                    name: `Buffer Point ${pointsArray.length + 1}`,
+                    position: {
+                        lat: sampleLat,
+                        lng: sampleLng
+                    },
+                    isWaypoint: false,
+                    isStart: false,
+                    isEnd: false
+                };
+
+                // Add to array
+                pointsArray.push(samplePoint);
+
+                // Update last sampled distance
+                lastSampledDistance += bufferDistanceMeters;
+            }
+
+            // Add segment distance to total
+            totalDistance += segmentDistance;
+        }
+    }
+
+        // Display a specific route on the map
+        function displayRoute(routeIndex) {
+            // Get the selected route
+            const route = routes[routeIndex];
+            if (!route) return;
+
+            // Update the route on the map
+            directionsRenderer.setRouteIndex(routeIndex);
+            directionsRenderer.setDirections({
+                routes: routes.map(r => ({
+                    overview_path: [],
+                    legs: [],
+                    warnings: [],
+                    bounds: null
+                })),
+                geocoded_waypoints: []
+            });
+
+            // Clear previous markers
+            clearMarkers();
+
+            // Create markers for all places along the route
+            route.allIntermediatePlaces.forEach((place, index) => {
+                let icon = {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                    scaledSize: new google.maps.Size(32, 32)
+                };
+
+                if (place.isStart) {
+                    icon.url = 'https://maps.google.com/mapfiles/ms/icons/green-dot.png';
+                } else if (place.isEnd) {
+                    icon.url = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png';
+                } else if (place.isWaypoint) {
+                    icon.url = 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
+                }
+
+                const marker = new google.maps.Marker({
+                    position: place.position,
+                    map: map,
+                    title: place.name,
+                    icon: icon,
+                    zIndex: place.isStart || place.isEnd ? 1000 : index
+                });
+
+                // Add an info window with coordinate information
+                const infoContent = `
+                    <div style="padding: 10px; max-width: 200px;">
+                        <h3 style="margin: 0 0 5px 0; font-size: 14px;">${place.name}</h3>
+                        <p style="margin: 0 0 5px 0; font-size: 12px; color: #555;">
+                            ${place.isStart ? 'Starting Point' : place.isEnd ? 'Destination' : place.isWaypoint ? 'Waypoint' : 'Intermediate Place'}
+                        </p>
+                        <div style="font-family: monospace; font-size: 12px; color: #4285F4; margin-top: 5px;">
+                            Lat: ${place.position.lat.toFixed(6)}<br>
+                            Lng: ${place.position.lng.toFixed(6)}
+                        </div>
+                    </div>
+                `;
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoContent
+                });
+
+                marker.addListener('click', () => {
+                    // Close all other info windows first
+                    markers.forEach(m => {
+                        if (m.infoWindow) {
+                            m.infoWindow.close();
+                        }
+                    });
+
+                    // Open this info window
+                    infoWindow.open(map, marker);
+                });
+
+                // Store the info window with the marker for later reference
+                marker.infoWindow = infoWindow;
+
+                markers.push(marker);
+            });
+
+            // Fit map to show all markers
+            const bounds = new google.maps.LatLngBounds();
+            markers.forEach(marker => {
+                bounds.extend(marker.getPosition());
+            });
+            map.fitBounds(bounds);
+
+            // Update places list
+            updatePlacesList(route);
+
+            // Update summary information
+            document.getElementById('totalDistance').textContent = route.distance;
+            document.getElementById('estimatedTime').textContent = route.duration;
+            document.getElementById('placesCount').textContent = route.allIntermediatePlaces.length;
+        }
+
+        // Update the list of places for the current route
+        function updatePlacesList(route) {
+            const placesList = document.getElementById('placesList');
+            placesList.innerHTML = '';
+
+            route.allIntermediatePlaces.forEach((place, index) => {
+                const placeElement = document.createElement('div');
+                placeElement.className = 'place-item';
+
+                if (place.isStart) {
+                    placeElement.classList.add('start-place');
+                } else if (place.isEnd) {
+                    placeElement.classList.add('end-place');
+                } else {
+                    placeElement.classList.add('intermediate-place');
+                }
+
+                const nameElement = document.createElement('h3');
+                nameElement.textContent = place.name;
+
+                const typeElement = document.createElement('p');
+                if (place.isStart) {
+                    typeElement.textContent = 'Starting Point';
+                } else if (place.isEnd) {
+                    typeElement.textContent = 'Destination';
+                } else if (place.isWaypoint) {
+                    typeElement.textContent = 'Waypoint';
+                } else {
+                    typeElement.textContent = 'Intermediate Place';
+                }
+
+                const coordsElement = document.createElement('div');
+                coordsElement.className = 'coordinates';
+                coordsElement.textContent = `Lat: ${place.position.lat.toFixed(6)}, Lng: ${place.position.lng.toFixed(6)}`;
+
+                placeElement.appendChild(nameElement);
+                placeElement.appendChild(typeElement);
+                placeElement.appendChild(coordsElement);
+                placesList.appendChild(placeElement);
+            });
+        }
+
+        // Populate the route selector dropdown
+        function populateRouteSelector(routeCount) {
+            const routeSelector = document.getElementById('routeSelector');
+            routeSelector.innerHTML = '';
+
+            for (let i = 0; i < routeCount; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i === 0 ? 'Primary Route' : `Alternative Route ${i}`;
+                routeSelector.appendChild(option);
+            }
+        }
+
+        // Clear all markers from the map
+        function clearMarkers() {
+            markers.forEach(marker => {
+                marker.setMap(null);
+            });
+            markers = [];
+        }
+
+        // Calculate total distance of a route
+        function calculateTotalDistance(route) {
+            let totalMeters = 0;
+
+            route.legs.forEach(leg => {
+                totalMeters += leg.distance.value;
+            });
+
+            // Format the distance nicely
+            if (totalMeters < 1000) {
+                return `${totalMeters} m`;
+            } else {
+                return `${(totalMeters / 1000).toFixed(1)} km`;
+            }
+        }
+
+        // Calculate total duration of a route
+        function calculateTotalDuration(route) {
+            let totalSeconds = 0;
+
+            route.legs.forEach(leg => {
+                totalSeconds += leg.duration.value;
+            });
+
+            // Format the duration nicely
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+            if (hours > 0) {
+                return `${hours} hr ${minutes} min`;
+            } else {
+                return `${minutes} min`;
+            }
+        }
+
+        // Extract a meaningful location name from step instructions
+        function extractLocationName(instructions) {
+            // Remove HTML tags first
+            const cleanText = stripHtmlTags(instructions);
+
+            // Try to extract location names with regexes
+            const patterns = [
+                /on\s+([\w\s]+)/, // "on Main Street"
+                /onto\s+([\w\s]+)/, // "onto Broadway"
+                /toward\s+([\w\s]+)/, // "toward Downtown"
+                /at\s+([\w\s]+)/ // "at 5th Avenue"
+            ];
+
+            for (const pattern of patterns) {
+                const match = cleanText.match(pattern);
+                if (match && match[1] && match[1].length > 3) {
+                    return match[1].trim();
+                }
+            }
+
+            return '';
+        }
+
+        // Remove HTML tags from a string
+        function stripHtmlTags(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        // Remove duplicate places from the array based on coordinates
+        function removeDuplicatePlaces(places) {
+            const uniquePlaces = [];
+            const seenCoordinates = new Set();
+
+            places.forEach(place => {
+                // Create a string representation of coordinates
+                const coordString = `${place.position.lat.toFixed(5)},${place.position.lng.toFixed(5)}`;
+
+                if (!seenCoordinates.has(coordString)) {
+                    seenCoordinates.add(coordString);
+                    uniquePlaces.push(place);
+                }
+            });
+
+            return uniquePlaces;
+        }
+
+        // Function to export coordinates of all places in the current route
+        function exportCoordinates() {
+            const routeSelector = document.getElementById('routeSelector');
+            const selectedRouteIndex = parseInt(routeSelector.value);
+            const route = routes[selectedRouteIndex];
+
+            if (!route) return;
+
+            // Create a CSV string
+            let csvContent = "Name,Type,Latitude,Longitude\n";
+
+            route.allIntermediatePlaces.forEach(place => {
+                let placeType = "Intermediate";
+                if (place.isStart) placeType = "Starting Point";
+                else if (place.isEnd) placeType = "Destination";
+                else if (place.isWaypoint) placeType = "Waypoint";
+
+                // Escape commas in place names
+                const escapedName = place.name.replace(/,/g, "\\,");
+
+                csvContent += `${escapedName},${placeType},${place.position.lat.toFixed(6)},${place.position.lng.toFixed(6)}\n`;
+            });
+
+            // Create a hidden download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            // Set properties
+            link.setAttribute('href', url);
+            link.setAttribute('download', `route-coordinates-${selectedRouteIndex + 1}.csv`);
+            link.style.visibility = 'hidden';
+
+            // Add to document, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Display coordinates in a modal dialog
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+                z-index: 10000;
+                max-width: 80%;
+                max-height: 80%;
+                overflow: auto;
+            `;
+
+            // Create a header for the modal
+            const modalHeader = document.createElement('div');
+            modalHeader.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            `;
+
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = `Coordinates for ${routeSelector.options[routeSelector.selectedIndex].textContent}`;
+            modalTitle.style.margin = '0';
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '×';
+            closeButton.style.cssText = `
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #555;
+            `;
+            closeButton.onclick = () => document.body.removeChild(modalOverlay);
+
+            modalHeader.appendChild(modalTitle);
+            modalHeader.appendChild(closeButton);
+
+            // Create the content for the modal
+            const coordinatesTable = document.createElement('table');
+            coordinatesTable.style.cssText = `
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            `;
+
+            // Add table header
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Place Name</th>
+                    <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Type</th>
+                    <th style="text-align: right; padding: 8px; border-bottom: 2px solid #ddd;">Latitude</th>
+                    <th style="text-align: right; padding: 8px; border-bottom: 2px solid #ddd;">Longitude</th>
+                </tr>
+            `;
+
+            const tbody = document.createElement('tbody');
+
+            // Add rows for each place
+            route.allIntermediatePlaces.forEach(place => {
+                let placeType = "Intermediate";
+                if (place.isStart) placeType = "Starting Point";
+                else if (place.isEnd) placeType = "Destination";
+                else if (place.isWaypoint) placeType = "Waypoint";
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${place.name}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${placeType}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">${place.position.lat.toFixed(6)}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">${place.position.lng.toFixed(6)}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            coordinatesTable.appendChild(thead);
+            coordinatesTable.appendChild(tbody);
+
+            // Information about the download
+            const downloadInfo = document.createElement('p');
+            downloadInfo.style.cssText = `
+                margin-top: 15px;
+                font-size: 14px;
+                color: #555;
+            `;
+            downloadInfo.innerHTML = 'A CSV file with these coordinates has been downloaded to your device.<br>You can open it in any spreadsheet application.';
+
+            // Add everything to the modal
+            modalContent.appendChild(modalHeader);
+            modalContent.appendChild(coordinatesTable);
+            modalContent.appendChild(downloadInfo);
+
+            // Create the overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+            `;
+
+            modalOverlay.onclick = (e) => {
+                if (e.target === modalOverlay) {
+                    document.body.removeChild(modalOverlay);
+                }
+            };
+
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+        }
+    </script>
+
+    <!-- Google Maps API script with Places library -->
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnFzm0egXHx7P7zBsOjC3NV01Wj3ZHgyo&libraries=places,geometry&callback=initMap"
+    async defer></script>
+</body>
+
+</html>
