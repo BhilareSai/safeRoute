@@ -235,6 +235,15 @@ export const analyzeRouteSafety = asyncErrorHandler(async (req, res) => {
   }
 });
 
+export const getALLReviews = asyncErrorHandler(async (req, res) => {
+  try {
+    const reviews = await Review.find();
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    return res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
 /**
  * Creates a spatial index for fast lookup of reviews near points
  * @param {Array} reviews - Array of review objects with lat and lon
