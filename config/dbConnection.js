@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
-var mongoURI = process.env.MONGO_URI;
+var mongoURI =
+  "mongodb+srv://bhilaresai64:85dSIiDleQnl8d8Y@cluster1.demrb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
 
 const connectDB = async () => {
   try {
