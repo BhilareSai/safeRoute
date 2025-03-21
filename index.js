@@ -110,7 +110,7 @@ app.get("/", (req, res) => {
 // Static files for the monitoring dashboard
 app.use(express.static(path.join(__dirname, "public")));
 
-const PORT = process.env.PORT || 4000;
+const PORT = 4001;
 
 await connectDB();
 
