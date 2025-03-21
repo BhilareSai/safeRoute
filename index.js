@@ -104,7 +104,9 @@ app.get("/api/status", (req, res) => {
 app.get("/sos-monitor", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "monitor.html"));
 });
-
+app.get("/", (req, res) => {
+  res.send("Hello World! v1");
+});
 // Static files for the monitoring dashboard
 app.use(express.static(path.join(__dirname, "public")));
 
