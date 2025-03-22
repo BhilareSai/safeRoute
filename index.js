@@ -19,6 +19,101 @@ if (!fs.existsSync(STORAGE_DIR)) {
   fs.mkdirSync(STORAGE_DIR, { recursive: true });
 }
 
+/**
+ * Reads all session directories and their audio files
+ * @param {string} sessionsPath - Path to the sessions directory
+ * @returns {Promise<Array>} - Array of session information objects
+ */
+async function readSessionsWithAudio(sessionsPath) {
+  try {
+    // Read the sessions directory
+    const sessionDirs = await fs.promises.readdir(sessionsPath);
+    console.log(`Found ${sessionDirs.length} sessions in ${sessionsPath}`);
+
+    // Process each session directory
+    const sessionInfoPromises = sessionDirs.map(async (sessionId) => {
+      const sessionPath = path.join(sessionsPath, sessionId);
+
+      try {
+        // Check if it's a directory
+        const stats = await fs.promises.stat(sessionPath);
+
+        if (!stats.isDirectory()) {
+          return null; // Skip if not a directory
+        }
+
+        // Read contents of the session directory
+        const sessionFiles = await fs.promises.readdir(sessionPath);
+
+        // Look for audio.mp3 file
+        const audioFile = sessionFiles.find((file) => file === "audio.mp3");
+        const audioPath = audioFile ? path.join(sessionPath, audioFile) : null;
+
+        // Get audio file stats if it exists
+        let audioStats = null;
+        if (audioPath) {
+          audioStats = await fs.promises.stat(audioPath);
+        }
+
+        // Build session info object
+        return {
+          sessionId: sessionId,
+          path: sessionPath,
+          hasAudio: !!audioPath,
+          audioPath: audioPath,
+          audioSize: audioStats ? audioStats.size : 0,
+          files: sessionFiles,
+          created: stats.birthtime,
+        };
+      } catch (error) {
+        console.error(`Error processing session ${sessionId}:`, error);
+        return {
+          sessionId: sessionId,
+          error: error.message,
+        };
+      }
+    });
+
+    // Wait for all session info promises to resolve
+    const sessions = await Promise.all(sessionInfoPromises);
+
+    // Filter out null values (non-directories)
+    return sessions.filter((session) => session !== null);
+  } catch (error) {
+    console.error(`Error reading sessions directory ${sessionsPath}:`, error);
+    throw error;
+  }
+}
+
+// Example usage
+const sessionsPath = "./sessions";
+readSessionsWithAudio(sessionsPath)
+  .then((sessions) => {
+    console.log(`Successfully read ${sessions.length} session directories`);
+
+    // Filter sessions with audio files
+    const sessionsWithAudio = sessions.filter((session) => session.hasAudio);
+    console.log(`Sessions with audio: ${sessionsWithAudio.length}`);
+
+    // Generate URLs for each audio file
+    const audioUrls = sessionsWithAudio.map((session) => {
+      return {
+        sessionId: session.sessionId,
+        apiUrl: `/api/audio/${session.sessionId}`,
+        created: session.created,
+      };
+    });
+
+    console.log("Audio URLs:");
+    audioUrls.forEach((url) => {
+      console.log(`- Session ${url.sessionId}: ${url.apiUrl}`);
+    });
+
+    // You could now store these URLs in your database
+  })
+  .catch((error) => {
+    console.error("Error in main function:", error);
+  });
 const app = express();
 const server = http.createServer(app);
 
@@ -115,7 +210,29 @@ app.get("/api/status", (req, res) => {
     activeVoiceDetections: voiceDetections.size,
   });
 });
+app.get("/api/audio/:sessionId", (req, res) => {
+  const { sessionId } = req.params;
+  const audioPath = path.join(STORAGE_DIR, sessionId, "audio.mp3");
 
+  // Check if the file exists
+  fs.access(audioPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error(`Audio file not found for session ${sessionId}:`, err);
+      return res.status(404).send("Audio file not found");
+    }
+
+    // Set appropriate headers for audio streaming
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="audio-${sessionId}.mp3"`
+    );
+
+    // Stream the file
+    const stream = fs.createReadStream(audioPath);
+    stream.pipe(res);
+  });
+});
 // Serve monitoring dashboard for SOS sessions
 app.get("/sos-monitor", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "monitor.html"));

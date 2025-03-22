@@ -6,20 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOS Audio Analysis Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #3a86ff;
+            --secondary-color: #8338ec;
+            --success-color: #38b000;
+            --warning-color: #ffbe0b;
+            --danger-color: #ff006e;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
         body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
             padding-top: 20px;
-            background-color: #f8f9fa;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.8rem;
         }
 
         .card {
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
-            font-weight: bold;
-            background-color: #f1f8ff;
+            font-weight: 600;
+            background-color: white;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0 !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            margin-right: 10px;
+            color: var(--primary-color);
         }
 
         .speaker-indicator {
@@ -32,9 +79,9 @@
 
         .timeline-container {
             height: 200px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background-color: #f8f9fa;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
             position: relative;
             overflow: hidden;
             margin-top: 10px;
@@ -44,7 +91,7 @@
         .timeline-segment {
             position: absolute;
             height: 30px;
-            border-radius: 3px;
+            border-radius: 6px;
             opacity: 0.8;
         }
 
@@ -54,37 +101,41 @@
             left: 0;
             right: 0;
             height: 20px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
             padding: 0 5px;
             font-size: 12px;
-            color: #666;
+            color: #888;
         }
 
         .quality-meter {
             width: 100%;
             height: 25px;
-            background-color: #e9ecef;
-            border-radius: 4px;
+            background-color: #f0f2f5;
+            border-radius: 6px;
             overflow: hidden;
             margin-bottom: 15px;
         }
 
         .quality-fill {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: width 0.5s ease;
         }
 
         .session-list {
-            max-height: 500px;
+            max-height: 625px;
             overflow-y: auto;
+            padding: 5px;
         }
 
         .session-card {
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
         }
 
         .session-card:hover {
@@ -93,14 +144,13 @@
 
         .session-card.active {
             background-color: #e7f5ff;
-            border-left: 4px solid #0d6efd;
+            border-left: 4px solid var(--primary-color);
         }
 
         .player-controls {
-            padding: 15px;
+            padding: 20px;
             background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
 
         .loading-overlay {
@@ -132,7 +182,7 @@
 
         .noise-bar {
             width: 5px;
-            background-color: #28a745;
+            background-color: var(--success-color);
             margin-right: 1px;
             transition: height 0.1s ease;
         }
@@ -155,7 +205,6 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* New styles for speaker visualization */
         .speaker-visualization {
             display: flex;
             flex-direction: column;
@@ -166,10 +215,16 @@
         .speaker-row {
             display: flex;
             align-items: center;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 8px;
             background-color: #f8f9fa;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .speaker-row:hover {
+            transform: translateX(5px);
+            background-color: #f1f8ff;
         }
 
         .speaker-icon {
@@ -215,6 +270,7 @@
             font-size: 12px;
             z-index: 9999;
             display: none;
+            border-radius: 10px 0 0 0;
         }
 
         .debug-panel.visible {
@@ -231,28 +287,160 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: #dc3545;
+            background-color: var(--danger-color);
             animation: pulse 1s infinite;
         }
 
         .confidence-badge {
             position: relative;
             display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 0.75rem;
             color: white;
             margin-left: 8px;
+        }
+
+        .map-container {
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .btn-action {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: #2667cc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .stats-card .stats-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .stats-card .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .danger-level-meter {
+            position: relative;
+            height: 40px;
+            background: linear-gradient(to right, #38b000, #ffbe0b, #ff006e);
+            border-radius: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .danger-level-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 3px;
+            background-color: #212529;
+            transition: all 0.3s;
+        }
+
+        .danger-level-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+
+        .status-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-icon {
+            background-color: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .status-content {
+            flex: 1;
+        }
+
+        audio::-webkit-media-controls-panel {
+            background-color: #f8f9fa;
+        }
+
+        audio::-webkit-media-controls-play-button {
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        audio::-webkit-media-controls-mute-button {
+            background-color: #f1f1f1;
+            border-radius: 50%;
+        }
+
+        .location-info {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="row mb-4">
-            <div class="col">
-                <h1 class="display-5">SOS Audio Analysis Dashboard</h1>
-                <p class="lead">Real-time speaker detection and audio quality analysis</p>
+        <div class="top-bar">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="fas fa-headset"></i> SOS Audio Analysis Dashboard</h1>
+                    <p class="mb-0">Real-time speaker detection and safety analysis</p>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex align-items-center">
+                        <div id="connection-status" class="badge bg-success me-3">Connected</div>
+                        <button id="toggle-debug" class="btn btn-sm btn-light"><i class="fas fa-bug me-1"></i>
+                            Debug</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -260,12 +448,8 @@
             <!-- Sessions List Panel -->
             <div class="col-md-4">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span>Sessions</span>
-                        <div class="d-flex align-items-center">
-                            <button id="toggle-debug" class="btn btn-sm btn-outline-secondary me-2">Debug</button>
-                            <span id="connection-status" class="badge bg-success">Connected</span>
-                        </div>
+                    <div class="card-header">
+                        <i class="fas fa-list-ul"></i> Sessions
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group session-list" id="session-list">
@@ -284,6 +468,7 @@
             <div class="col-md-8">
                 <div id="no-session-selected" class="card">
                     <div class="card-body text-center py-5">
+                        <i class="fas fa-hand-pointer mb-3" style="font-size: 3rem; color: #ccc;"></i>
                         <h3>No Session Selected</h3>
                         <p class="text-muted">Select a session from the list to view its analysis.</p>
                     </div>
@@ -292,9 +477,9 @@
                 <div id="analysis-container" class="d-none">
                     <!-- Session Info Card -->
                     <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span>Session Information</span>
-                            <div>
+                        <div class="card-header">
+                            <i class="fas fa-info-circle"></i> Session Information
+                            <div class="float-end">
                                 <span id="live-badge" class="badge bg-danger live-badge me-2 d-none">LIVE</span>
                                 <span id="session-id-badge" class="badge bg-primary"></span>
                             </div>
@@ -302,38 +487,112 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><strong>Start Time:</strong> <span id="session-start-time">-</span></p>
-                                    <p><strong>Duration:</strong> <span id="session-duration">-</span></p>
-                                    <p><strong>Device ID:</strong> <span id="session-device-id">-</span></p>
+                                    <p><i class="far fa-clock me-2 text-muted"></i><strong>Start Time:</strong> <span
+                                            id="session-start-time">-</span></p>
+                                    <p><i class="fas fa-hourglass-half me-2 text-muted"></i><strong>Duration:</strong>
+                                        <span id="session-duration">-</span></p>
+                                    <p><i class="fas fa-mobile-alt me-2 text-muted"></i><strong>Device ID:</strong>
+                                        <span id="session-device-id">-</span></p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Total Data:</strong> <span id="session-data-size">-</span></p>
-                                    <p><strong>Status:</strong> <span id="session-status">-</span></p>
-                                    <div id="download-links" class="d-none">
-                                        <a id="download-original" href="#"
-                                            class="btn btn-sm btn-outline-primary">Download
-                                            Recording</a>
+                                    <p><i class="fas fa-database me-2 text-muted"></i><strong>Total Data:</strong> <span
+                                            id="session-data-size">-</span></p>
+                                    <p><i class="fas fa-check-circle me-2 text-muted"></i><strong>Status:</strong> <span
+                                            id="session-status">-</span></p>
+                                    <div id="download-links" class="d-none mt-3">
+                                        <a id="download-original" href="#" class="btn btn-action"><i
+                                                class="fas fa-download me-1"></i> Download Recording</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Safety Assessment Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-shield-alt"></i> Safety Assessment
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="stats-card">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <div class="stats-value" id="danger-score">0.0</div>
+                                        <div class="stats-label">Danger Score</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stats-card">
+                                        <i class="fas fa-check-circle"></i>
+                                        <div class="stats-value" id="confidence-score">0%</div>
+                                        <div class="stats-label">Confidence</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stats-card">
+                                        <i class="fas fa-thermometer-half"></i>
+                                        <div class="stats-value" id="severity-level">Safe</div>
+                                        <div class="stats-label">Severity</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i> Danger Level</h5>
+                            <div class="danger-level-meter">
+                                <div class="danger-level-indicator" id="danger-level-indicator" style="left: 0%;"></div>
+                            </div>
+                            <div class="danger-level-labels">
+                                <span>Safe</span>
+                                <span>Medium</span>
+                                <span>Critical</span>
+                            </div>
+
+                            <div class="status-card mt-4">
+                                <div class="status-icon">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div class="status-content">
+                                    <h6 class="mb-1">Recommended Action</h6>
+                                    <p class="mb-0" id="recommended-action">No action needed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-map-marker-alt"></i> Location Information
+                        </div>
+                        <div class="card-body">
+                            <div class="location-info">
+                                <p><strong>Latitude:</strong> <span id="latitude">-</span></p>
+                                <p><strong>Longitude:</strong> <span id="longitude">-</span></p>
+                                <p><strong>Accuracy:</strong> <span id="location-accuracy">-</span></p>
+                                <p><strong>Last Updated:</strong> <span id="location-timestamp">-</span></p>
+                            </div>
+                            <div id="map" class="map-container"></div>
+                        </div>
+                    </div>
+
                     <!-- Real-time Analysis Card -->
                     <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span>Audio Analysis</span>
-                            <div class="real-time-indicator d-none" id="real-time-indicator">
-                                <div class="real-time-dot"></div>
-                                <small>Real-time processing</small>
+                        <div class="card-header">
+                            <i class="fas fa-headphones"></i> Audio Analysis
+                            <div class="float-end">
+                                <div class="real-time-indicator d-none" id="real-time-indicator">
+                                    <div class="real-time-dot"></div>
+                                    <small>Real-time processing</small>
+                                </div>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <h5 class="d-flex align-items-center">
-                                        Speaker Count
-                                        <span id="confidence-indicator" class="confidence-badge bg-info">0%</span>
+                                        <i class="fas fa-users me-2"></i> Speaker Count
+                                        <span id="confidence-indicator" class="confidence-badge bg-info ms-2">0%</span>
                                     </h5>
                                     <div class="d-flex align-items-center mb-3">
                                         <h2 id="speaker-count" class="m-0">-</h2>
@@ -342,7 +601,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <h5>Noise Level</h5>
+                                    <h5><i class="fas fa-volume-up me-2"></i> Noise Level</h5>
                                     <div class="noise-level-indicator">
                                         <span id="noise-level-value">-</span>
                                         <div class="noise-level-bars" id="noise-level-bars">
@@ -350,7 +609,7 @@
                                         </div>
                                     </div>
 
-                                    <h5>Recording Quality</h5>
+                                    <h5><i class="fas fa-signal me-2"></i> Recording Quality</h5>
                                     <div class="quality-meter">
                                         <div id="quality-meter-fill" class="quality-fill bg-success" style="width: 0%">
                                         </div>
@@ -360,15 +619,16 @@
                                 </div>
                             </div>
 
-                            <h5 class="mb-3">Speaker Analysis</h5>
+                            <h5 class="mb-3"><i class="fas fa-comment-alt me-2"></i> Speaker Analysis</h5>
                             <div id="speaker-visualization" class="speaker-visualization">
                                 <!-- Speaker visualization will be added dynamically -->
                                 <div class="text-center py-3 text-muted">
-                                    No speakers detected yet
+                                    <i class="fas fa-user-slash mb-2" style="font-size: 1.5rem;"></i>
+                                    <p>No speakers detected yet</p>
                                 </div>
                             </div>
 
-                            <h5 class="mt-4">Speaker Timeline</h5>
+                            <h5 class="mt-4"><i class="fas fa-clock me-2"></i> Speaker Timeline</h5>
                             <div class="timeline-container" id="timeline-container">
                                 <!-- Timeline segments will be added dynamically -->
                                 <div class="timeline-scale" id="timeline-scale">
@@ -380,10 +640,24 @@
 
                     <!-- Audio Player Card -->
                     <div class="card mb-4">
-                        <div class="card-header">Audio Playback</div>
+                        <div class="card-header">
+                            <i class="fas fa-play-circle"></i> Audio Playback
+                        </div>
                         <div class="card-body">
                             <div class="player-controls">
                                 <audio id="audio-player" controls class="w-100"></audio>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transcription Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-file-alt"></i> Voice Transcription
+                        </div>
+                        <div class="card-body">
+                            <div id="transcription" class="p-3 bg-light rounded" style="min-height: 100px;">
+                                <p class="text-muted text-center">No transcription available yet.</p>
                             </div>
                         </div>
                     </div>
@@ -403,8 +677,14 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Mapbox (replace with your access token)
+            mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXVzZXIiLCJhIjoiY2theGV6aGJkMDAxcjJ5cWdjOWs4eTY2eCJ9.example-signature';
+
+            let map = null;
+
             // Elements
             const sessionList = document.getElementById('session-list');
             const noSessionSelected = document.getElementById('no-session-selected');
@@ -434,19 +714,34 @@
             const toggleDebugBtn = document.getElementById('toggle-debug');
             const clearDebugBtn = document.getElementById('clear-debug');
             const realTimeIndicator = document.getElementById('real-time-indicator');
+            const transcription = document.getElementById('transcription');
+
+            // Safety assessment elements
+            const dangerScore = document.getElementById('danger-score');
+            const confidenceScore = document.getElementById('confidence-score');
+            const severityLevel = document.getElementById('severity-level');
+            const dangerLevelIndicator = document.getElementById('danger-level-indicator');
+            const recommendedAction = document.getElementById('recommended-action');
+
+            // Location elements
+            const latitude = document.getElementById('latitude');
+            const longitude = document.getElementById('longitude');
+            const locationAccuracy = document.getElementById('location-accuracy');
+            const locationTimestamp = document.getElementById('location-timestamp');
 
             // Variables
             let selectedSessionId = null;
             let isLiveSession = false;
             let activeSessions = new Map();
             let archivedSessions = [];
-            let speakerColors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+            let speakerColors = ['#3a86ff', '#ff006e', '#38b000', '#ffbe0b', '#8338ec', '#fb5607'];
             let currentAnalysis = null;
             let wsConnection = null;
             let reconnectAttempts = 0;
             let maxReconnectAttempts = 10;
             let reconnectInterval = 2000; // Start with 2 seconds
             let durationUpdateInterval = null;
+            let currentMarker = null;
 
             // Create 10 noise level bars
             for (let i = 0; i < 10; i++) {
@@ -454,6 +749,48 @@
                 bar.className = 'noise-bar';
                 bar.style.height = '3px';
                 noiseLevelBars.appendChild(bar);
+            }
+
+            // Initialize map
+            function initializeMap() {
+                if (map) return; // Map already initialized
+
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [-74.5, 40], // Default location (New York)
+                    zoom: 9
+                });
+
+                map.addControl(new mapboxgl.NavigationControl());
+            }
+
+            // Update map with location
+            function updateMapLocation(lat, lng) {
+                if (!map) {
+                    initializeMap();
+                }
+
+                if (lat && lng) {
+                    // Update map center
+                    map.flyTo({
+                        center: [lng, lat],
+                        zoom: 13,
+                        essential: true
+                    });
+
+                    // Remove existing marker if any
+                    if (currentMarker) {
+                        currentMarker.remove();
+                    }
+
+                    // Add marker
+                    currentMarker = new mapboxgl.Marker({
+                        color: "#ff006e"
+                    })
+                        .setLngLat([lng, lat])
+                        .addTo(map);
+                }
             }
 
             // Debug functions
@@ -552,36 +889,6 @@
                     debugLog(`Subscribed to analysis for session ${sessionId}`);
                 }
             }
-            function sendDebugMessage(sessionId) {
-                if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-                    // Send a test message to check if WebSocket is working
-                    wsConnection.send(JSON.stringify({
-                        type: 'debugRequest',
-                        sessionId: sessionId,
-                        message: 'Debug request from audio-analysis dashboard'
-                    }));
-                    debugLog(`Sent debug request for session ${sessionId}`);
-                } else {
-                    debugLog('Cannot send debug message: WebSocket not connected');
-                }
-            }
-            function manualSpeakerUpdate(count) {
-                updateSpeakerCount(count, 0.8);
-                debugLog(`Manually updated speaker count to ${count}`);
-
-                // Create dummy clusters for visualization
-                const dummyClusters = [];
-                for (let i = 0; i < count; i++) {
-                    dummyClusters.push({
-                        speakerId: i + 1,
-                        speakingTime: 10 + (i * 5),
-                        confidence: 0.7 + (i * 0.05),
-                        segments: []
-                    });
-                }
-
-                updateSpeakerVisualization(dummyClusters);
-            }
 
             // Format bytes to human-readable format
             function formatBytes(bytes, decimals = 2) {
@@ -636,8 +943,74 @@
                     case 'detectionEnd':
                         handleDetectionEnd(data);
                         break;
+                    case 'locationUpdate':
+                        handleLocationUpdate(data);
+                        break;
+                    case 'safetyAnalysis':
+                        handleSafetyAnalysis(data);
+                        break;
                     default:
                         debugLog(`Unknown message type: ${data.type}`);
+                }
+            }
+
+            // Handle location update message
+            function handleLocationUpdate(data) {
+                if (data.sessionId !== selectedSessionId) return;
+
+                if (data.latitude && data.longitude) {
+                    // Update location display
+                    latitude.textContent = data.latitude.toFixed(6);
+                    longitude.textContent = data.longitude.toFixed(6);
+                    locationAccuracy.textContent = data.accuracy ? `${data.accuracy.toFixed(1)} meters` : 'Unknown';
+                    locationTimestamp.textContent = data.timestamp ? formatDate(data.timestamp) : 'Unknown';
+
+                    // Update map
+                    updateMapLocation(data.latitude, data.longitude);
+                }
+            }
+
+            // Handle safety analysis update
+            function handleSafetyAnalysis(data) {
+                if (data.sessionId !== selectedSessionId) return;
+
+                if (data.analysis) {
+                    const analysis = data.analysis;
+
+                    // Update danger score
+                    const score = parseFloat(analysis.danger_score || 0).toFixed(1);
+                    dangerScore.textContent = score;
+
+                    // Update confidence
+                    const confidence = parseInt(analysis.confidence_percentage || 0);
+                    confidenceScore.textContent = `${confidence}%`;
+
+                    // Update severity level
+                    severityLevel.textContent = analysis.severity || 'Safe';
+
+                    // Update color based on severity
+                    if (analysis.severity === 'critical') {
+                        severityLevel.style.color = '#ff006e';
+                    } else if (analysis.severity === 'high') {
+                        severityLevel.style.color = '#ff5400';
+                    } else if (analysis.severity === 'medium') {
+                        severityLevel.style.color = '#ffbe0b';
+                    } else {
+                        severityLevel.style.color = '#38b000';
+                    }
+
+                    // Update danger level indicator position (0-10 scale to 0-100%)
+                    const dangerLevel = parseFloat(analysis.danger_score || 0);
+                    const indicatorPosition = (dangerLevel / 10) * 100;
+                    dangerLevelIndicator.style.left = `${indicatorPosition}%`;
+
+                    // Update recommended action
+                    recommendedAction.textContent = analysis.recommended_action || 'No action needed';
+
+                    // Update transcription if available
+                    if (analysis.transcription) {
+                        transcription.innerHTML = `<p>${analysis.transcription}</p>`;
+                    }
                 }
             }
 
@@ -671,13 +1044,13 @@
                 fetch('/api/sos/archived-sessions')
                     .then(response => response.json())
                     .then(data => {
-                        archivedSessions = data.sessions || [];
+                        archivedSessions = [];
 
                         // Add archived sessions to the list
                         archivedSessions.forEach(session => {
                             // Only add if not already active
                             if (!activeSessions.has(session.id)) {
-                                addSessionToList(session, false);
+                                <!-- addSessionToList(session, false); -->
                             }
                         });
                     })
@@ -717,7 +1090,7 @@
                         <div>
                           <h6 class="mb-1">${shortId}...</h6>
                           <small class="text-muted">${formatDate(session.startTime)}</small>
-                          ${isActive ? '<span class="badge bg-danger ms-2">Live</span>' : ''}
+                          ${isActive ? '<span class="badge bg-danger ms-2 live-badge">Live</span>' : ''}
                         </div>
                         <span class="badge bg-secondary">${formatBytes(session.bytesReceived || 0)}</span>
                     </div>
@@ -777,10 +1150,15 @@
 
                 // Load session details
                 loadSessionDetails(sessionId);
+
+                // Initialize the map if not done yet
+                initializeMap();
             }
 
             // Load session details
             function loadSessionDetails(sessionId) {
+           
+
                 fetch(`/api/sos/session/${sessionId}`)
                     .then(response => response.json())
                     .then(session => {
@@ -797,10 +1175,42 @@
 
                         // Load detection status
                         loadDetectionStatus(sessionId);
+
+                        // Load location if available
+                        if (session.latitude && session.longitude) {
+                            handleLocationUpdate({
+                                sessionId: sessionId,
+                                latitude: session.latitude,
+                                longitude: session.longitude,
+                                accuracy: session.locationAccuracy,
+                                timestamp: session.locationTimestamp
+                            });
+                        }
+
+                        // Load safety analysis if available
+                        loadSafetyAnalysis(sessionId);
                     })
                     .catch(error => {
                         debugLog('Error loading session details: ' + error.message);
                         console.error('Error loading session details:', error);
+                    });
+            }
+
+            // Load safety analysis
+            function loadSafetyAnalysis(sessionId) {
+                fetch(`/api/sos/safety-analysis/${sessionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.analysis) {
+                            handleSafetyAnalysis({
+                                sessionId: sessionId,
+                                analysis: data.analysis
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        debugLog('Error loading safety analysis: ' + error.message);
+                        console.error('Error loading safety analysis:', error);
                     });
             }
 
@@ -901,7 +1311,8 @@
                 if (!clusters || clusters.length === 0) {
                     speakerVisualization.innerHTML = `
                         <div class="text-center py-3 text-muted">
-                            No speakers detected yet
+                            <i class="fas fa-user-slash mb-2" style="font-size: 1.5rem;"></i>
+                            <p>No speakers detected yet</p>
                         </div>
                     `;
                     return;
@@ -923,7 +1334,7 @@
                     speakerRow.className = 'speaker-row';
                     speakerRow.innerHTML = `
                         <div class="speaker-icon" style="background-color: ${color};">
-                            ${speakerId}
+                            <i class="fas fa-user"></i>
                         </div>
                         <div class="speaker-details">
                             <div class="d-flex justify-content-between">
@@ -1010,14 +1421,9 @@
             }
 
             // Handle speaker detection message
-       function handleSpeakerDetection(data) {
-                // Debug the incoming data
-                console.log("Speaker detection data received:", data);
-                debugLog(`Speaker detection raw data: ${JSON.stringify(data)}`);
-
+            function handleSpeakerDetection(data) {
                 // Skip if this isn't for the selected session
                 if (data.sessionId !== selectedSessionId) {
-                    debugLog(`Ignoring speaker detection for non-selected session: ${data.sessionId}`);
                     return;
                 }
 
@@ -1028,11 +1434,9 @@
                 if (typeof data.detectedSpeakers === 'number') {
                     speakerCount = data.detectedSpeakers;
                     confidence = data.confidence || 0;
-                    debugLog(`Found speaker count directly in data: ${speakerCount}`);
                 } else if (data.data && typeof data.data.detectedSpeakers === 'number') {
                     speakerCount = data.data.detectedSpeakers;
                     confidence = data.data.confidence || 0;
-                    debugLog(`Found speaker count in data.data: ${speakerCount}`);
                 } else {
                     // Try parsing all properties to find speaker count
                     for (const key in data) {
@@ -1040,21 +1444,18 @@
                             if (typeof data[key].detectedSpeakers === 'number') {
                                 speakerCount = data[key].detectedSpeakers;
                                 confidence = data[key].confidence || 0;
-                                debugLog(`Found speaker count in data.${key}: ${speakerCount}`);
                                 break;
                             }
                         }
                     }
                 }
 
-                // Force an update even if count is 0 to make sure display is working
-                debugLog(`Updating speaker count to: ${speakerCount} (confidence: ${confidence})`);
+                // Update display
                 updateSpeakerCount(speakerCount, confidence);
 
                 // Update speaker visualization if cluster info is available
                 if (data.clusters) {
                     updateSpeakerVisualization(data.clusters);
-                    debugLog(`Updated speaker visualization with ${data.clusters.length} clusters`);
                 }
 
                 // Update session list item
@@ -1065,9 +1466,9 @@
                 if (session) {
                     session.currentSpeakerCount = speakerCount;
                     session.detectionConfidence = confidence;
-                    debugLog(`Updated session object with speaker count: ${speakerCount}`);
                 }
             }
+
             // Update session list item with speaker count
             function updateSessionListItem(sessionId, speakerCount) {
                 const sessionItem = document.querySelector(`.session-card[data-sessionid="${sessionId}"]`);
@@ -1090,8 +1491,6 @@
 
             // Handle detection start message
             function handleDetectionStart(data) {
-                debugLog(`Speaker detection started for session ${data.sessionId}`);
-
                 if (data.sessionId === selectedSessionId) {
                     realTimeIndicator.classList.remove('d-none');
                 }
@@ -1099,8 +1498,6 @@
 
             // Handle detection end message
             function handleDetectionEnd(data) {
-                debugLog(`Speaker detection ended for session ${data.sessionId}`);
-
                 if (data.sessionId === selectedSessionId) {
                     realTimeIndicator.classList.add('d-none');
 
@@ -1128,14 +1525,10 @@
                     deviceId: data.deviceId,
                     bytesReceived: 0
                 }, true);
-
-                debugLog(`New session started: ${data.sessionId}`);
             }
 
             // Handle session end message
             function handleSessionEnd(data) {
-                debugLog(`Session ended: ${data.sessionId}`);
-
                 // Remove from active sessions
                 activeSessions.delete(data.sessionId);
 
@@ -1182,18 +1575,7 @@
                 }
             }
 
-            // Initialize noise level display
-            function initializeNoiseLevelDisplay() {
-                noiseLevelValue.textContent = '0%';
-
-                const bars = noiseLevelBars.querySelectorAll('.noise-bar');
-                bars.forEach(bar => {
-                    bar.style.height = '10%';
-                    bar.style.backgroundColor = '#e9ecef';
-                });
-            }
-
-            // Set up noise level simulation for demo
+            // Set up simulated noise level for demo
             function simulateNoiseLevel() {
                 // Only for live sessions
                 if (!isLiveSession) return;
@@ -1214,11 +1596,11 @@
 
                         // Color based on index
                         if (index < 3) {
-                            bar.style.backgroundColor = '#28a745'; // Green
+                            bar.style.backgroundColor = 'var(--success-color)'; // Green
                         } else if (index < 7) {
-                            bar.style.backgroundColor = '#ffc107'; // Yellow
+                            bar.style.backgroundColor = 'var(--warning-color)'; // Yellow
                         } else {
-                            bar.style.backgroundColor = '#dc3545'; // Red
+                            bar.style.backgroundColor = 'var(--danger-color)'; // Red
                         }
                     } else {
                         bar.style.height = '10%';
@@ -1242,14 +1624,149 @@
                 }
             }
 
-            // Initialize
-            connectWebSocket();
-            initializeNoiseLevelDisplay();
+            // Simulate safety analysis data for demo
+            function simulateSafetyAnalysis() {
+                if (!isLiveSession || !selectedSessionId) return;
 
-            // For demo purposes, simulate noise level changes
-            setInterval(simulateNoiseLevel, 2000);
+                // Simulate random danger score between 0-10
+                const dangerLevel = Math.random() * 10;
+                let severity, actionText, confidenceVal;
+
+                if (dangerLevel >= 8) {
+                    severity = 'critical';
+                    actionText = 'Immediate emergency response recommended';
+                    confidenceVal = 80 + Math.floor(Math.random() * 20); // 80-99%
+                } else if (dangerLevel >= 5) {
+                    severity = 'high';
+                    actionText = 'Contact emergency services';
+                    confidenceVal = 70 + Math.floor(Math.random() * 20); // 70-89%
+                } else if (dangerLevel >= 3) {
+                    severity = 'medium';
+                    actionText = 'Check in with person and monitor situation';
+                    confidenceVal = 60 + Math.floor(Math.random() * 20); // 60-79%
+                } else {
+                    severity = 'safe';
+                    actionText = 'No action needed';
+                    confidenceVal = 50 + Math.floor(Math.random() * 30); // 50-79%
+                }
+
+                // Update UI
+                handleSafetyAnalysis({
+                    sessionId: selectedSessionId,
+                    analysis: {
+                        danger_score: dangerLevel.toFixed(1),
+                        confidence_percentage: confidenceVal,
+                        severity: severity,
+                        recommended_action: actionText,
+                        transcription: 'This is a simulated transcription of the audio recording.'
+                    }
+                });
+
+                // Simulate location updates
+                simulateLocationUpdate();
+            }
+
+            // Simulate location updates for demo
+            function simulateLocationUpdate() {
+                if (!isLiveSession || !selectedSessionId) return;
+
+                // Generate random coordinates near New York City
+                const baseLat = 40.7128;
+                const baseLng = -74.0060;
+
+                const lat = baseLat + (Math.random() - 0.5) * 0.1;
+                const lng = baseLng + (Math.random() - 0.5) * 0.1;
+
+                handleLocationUpdate({
+                    sessionId: selectedSessionId,
+                    latitude: lat,
+                    longitude: lng,
+                    accuracy: 10 + Math.floor(Math.random() * 50), // 10-59 meters
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Initialize
+            function initialize() {
+                // Connect to WebSocket
+                connectWebSocket();
+
+                // Add noise level bars
+                const noiseBars = document.getElementById('noise-level-bars');
+                noiseBars.innerHTML = '';
+                for (let i = 0; i < 10; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'noise-bar';
+                    bar.style.height = '3px';
+                    noiseBars.appendChild(bar);
+                }
+
+                // For demo purposes, simulate data changes
+                setInterval(simulateNoiseLevel, 2000);
+                setInterval(simulateSafetyAnalysis, 5000);
+
+                // Initial session list load
+                setTimeout(() => {
+                    // Simulate sessions data for demo
+                    
+                    handleSessionList(demoSessions);
+
+                    // Select the first session automatically
+                    if (demoSessions && demoSessions.length > 0) {
+                        selectSession(demoSessions[0].id, true);
+                    }
+                }, 1000);
+            }
+
+            // Generate demo sessions data
+            
+            // Generate demo speaker clusters
+            function generateDemoSpeakerClusters(count) {
+                const clusters = [];
+                let totalTime = 0;
+
+                // Generate random speaking times, ensuring they add up to a reasonable amount
+                const speakingTimes = [];
+                for (let i = 0; i < count; i++) {
+                    const time = 30 + Math.floor(Math.random() * 120); // 30-150 seconds
+                    speakingTimes.push(time);
+                    totalTime += time;
+                }
+
+                // Generate clusters
+                for (let i = 0; i < count; i++) {
+                    const segments = [];
+                    let currentTime = 0;
+
+                    // Generate 3-8 segments per speaker
+                    const segmentCount = 3 + Math.floor(Math.random() * 6);
+                    for (let j = 0; j < segmentCount; j++) {
+                        const segmentDuration = speakingTimes[i] / segmentCount;
+                        const gap = Math.random() * 10; // 0-10 second gaps
+
+                        segments.push({
+                            startTime: currentTime,
+                            endTime: currentTime + segmentDuration
+                        });
+
+                        currentTime += segmentDuration + gap;
+                    }
+
+                    clusters.push({
+                        speakerId: i + 1,
+                        speakingTime: speakingTimes[i],
+                        confidence: 0.7 + (Math.random() * 0.3), // 0.7-1.0
+                        segments: segments
+                    });
+                }
+
+                return clusters;
+            }
+
+            // Start the application
+            initialize();
         });
-                    </script>
+    </script>
 </body>
 
 </html>

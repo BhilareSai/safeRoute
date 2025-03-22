@@ -7,7 +7,7 @@ import ffmpegPath from "ffmpeg-static";
 import ffmpeg from "fluent-ffmpeg";
 import { spawn } from "child_process";
 import axios from "axios";
-
+import Audio from "../models/audio.js";
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 const router = express.Router();
@@ -111,7 +111,15 @@ router.post("/start", async (req, res) => {
         },
       }
     );
+
     console.log("response from welcome message", result.data);
+    await Audio.create({
+      lat: location.latitude,
+      lon: location.longitude,
+      sessionId,
+      device_id: device_id,
+      batter: 75,
+    });
     // Create session metadata
     const sessionInfo = {
       startTime: new Date().toISOString(),
@@ -627,7 +635,18 @@ router.post("/end", async (req, res) => {
 
     // Remove session from active sessions
     req.activeSessions.delete(session_id);
-
+    var ress = await Audio.findOneAndUpdate(
+      { sessionId: session_id },
+      {
+        $set: {
+          audio: "api/audio/" + session_id,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    console.log(ress);
     console.log(`Ended session: ${session_id}`);
 
     return res.status(200).json({
