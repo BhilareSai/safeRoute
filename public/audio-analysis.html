@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS Audio Analysis Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            font-weight: bold;
+            background-color: #f1f8ff;
+        }
+
+        .speaker-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .timeline-container {
+            height: 200px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timeline-segment {
+            position: absolute;
+            height: 30px;
+            border-radius: 3px;
+            opacity: 0.8;
+        }
+
+        .timeline-scale {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .quality-meter {
+            width: 100%;
+            height: 25px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .quality-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .session-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .session-card {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .session-card:hover {
+            background-color: #f1f8ff;
+        }
+
+        .session-card.active {
+            background-color: #e7f5ff;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .player-controls {
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .noise-level-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .noise-level-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 30px;
+            margin-left: 10px;
+            gap: 2px;
+        }
+
+        .noise-bar {
+            width: 5px;
+            background-color: #28a745;
+            margin-right: 1px;
+            transition: height 0.1s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .live-badge {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* New styles for speaker visualization */
+        .speaker-visualization {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .speaker-row {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .speaker-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            margin-right: 15px;
+        }
+
+        .speaker-details {
+            flex-grow: 1;
+        }
+
+        .speaker-time-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .speaker-time-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 400px;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .debug-panel.visible {
+            display: block;
+        }
+
+        .real-time-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .real-time-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #dc3545;
+            animation: pulse 1s infinite;
+        }
+
+        .confidence-badge {
+            position: relative;
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: white;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5">SOS Audio Analysis Dashboard</h1>
+                <p class="lead">Real-time speaker detection and audio quality analysis</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sessions List Panel -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Sessions</span>
+                        <div class="d-flex align-items-center">
+                            <button id="toggle-debug" class="btn btn-sm btn-outline-secondary me-2">Debug</button>
+                            <span id="connection-status" class="badge bg-success">Connected</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group session-list" id="session-list">
+                            <div class="list-group-item text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-3">Loading sessions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Panel -->
+            <div class="col-md-8">
+                <div id="no-session-selected" class="card">
+                    <div class="card-body text-center py-5">
+                        <h3>No Session Selected</h3>
+                        <p class="text-muted">Select a session from the list to view its analysis.</p>
+                    </div>
+                </div>
+
+                <div id="analysis-container" class="d-none">
+                    <!-- Session Info Card -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Session Information</span>
+                            <div>
+                                <span id="live-badge" class="badge bg-danger live-badge me-2 d-none">LIVE</span>
+                                <span id="session-id-badge" class="badge bg-primary"></span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Start Time:</strong> <span id="session-start-time">-</span></p>
+                                    <p><strong>Duration:</strong> <span id="session-duration">-</span></p>
+                                    <p><strong>Device ID:</strong> <span id="session-device-id">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Total Data:</strong> <span id="session-data-size">-</span></p>
+                                    <p><strong>Status:</strong> <span id="session-status">-</span></p>
+                                    <div id="download-links" class="d-none">
+                                        <a id="download-original" href="#"
+                                            class="btn btn-sm btn-outline-primary">Download
+                                            Recording</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Analysis Card -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>Audio Analysis</span>
+                            <div class="real-time-indicator d-none" id="real-time-indicator">
+                                <div class="real-time-dot"></div>
+                                <small>Real-time processing</small>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5 class="d-flex align-items-center">
+                                        Speaker Count
+                                        <span id="confidence-indicator" class="confidence-badge bg-info">0%</span>
+                                    </h5>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <h2 id="speaker-count" class="m-0">-</h2>
+                                        <small class="text-muted ms-2">detected speakers</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5>Noise Level</h5>
+                                    <div class="noise-level-indicator">
+                                        <span id="noise-level-value">-</span>
+                                        <div class="noise-level-bars" id="noise-level-bars">
+                                            <!-- Noise level bars will be added dynamically -->
+                                        </div>
+                                    </div>
+
+                                    <h5>Recording Quality</h5>
+                                    <div class="quality-meter">
+                                        <div id="quality-meter-fill" class="quality-fill bg-success" style="width: 0%">
+                                        </div>
+                                    </div>
+                                    <small id="quality-description" class="text-muted">Calculating quality
+                                        score...</small>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3">Speaker Analysis</h5>
+                            <div id="speaker-visualization" class="speaker-visualization">
+                                <!-- Speaker visualization will be added dynamically -->
+                                <div class="text-center py-3 text-muted">
+                                    No speakers detected yet
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4">Speaker Timeline</h5>
+                            <div class="timeline-container" id="timeline-container">
+                                <!-- Timeline segments will be added dynamically -->
+                                <div class="timeline-scale" id="timeline-scale">
+                                    <!-- Time markers will be added dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Player Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">Audio Playback</div>
+                        <div class="card-body">
+                            <div class="player-controls">
+                                <audio id="audio-player" controls class="w-100"></audio>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel" class="debug-panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Debug Console</strong>
+            <button id="clear-debug" class="btn btn-sm btn-dark">Clear</button>
+        </div>
+        <div id="debug-messages"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Elements
+            const sessionList = document.getElementById('session-list');
+            const noSessionSelected = document.getElementById('no-session-selected');
+            const analysisContainer = document.getElementById('analysis-container');
+            const connectionStatus = document.getElementById('connection-status');
+            const liveBadge = document.getElementById('live-badge');
+            const sessionIdBadge = document.getElementById('session-id-badge');
+            const sessionStartTime = document.getElementById('session-start-time');
+            const sessionDuration = document.getElementById('session-duration');
+            const sessionDeviceId = document.getElementById('session-device-id');
+            const sessionDataSize = document.getElementById('session-data-size');
+            const sessionStatus = document.getElementById('session-status');
+            const downloadLinks = document.getElementById('download-links');
+            const downloadOriginal = document.getElementById('download-original');
+            const speakerCount = document.getElementById('speaker-count');
+            const confidenceIndicator = document.getElementById('confidence-indicator');
+            const speakerVisualization = document.getElementById('speaker-visualization');
+            const noiseLevelValue = document.getElementById('noise-level-value');
+            const noiseLevelBars = document.getElementById('noise-level-bars');
+            const qualityMeterFill = document.getElementById('quality-meter-fill');
+            const qualityDescription = document.getElementById('quality-description');
+            const timelineContainer = document.getElementById('timeline-container');
+            const timelineScale = document.getElementById('timeline-scale');
+            const audioPlayer = document.getElementById('audio-player');
+            const debugPanel = document.getElementById('debug-panel');
+            const debugMessages = document.getElementById('debug-messages');
+            const toggleDebugBtn = document.getElementById('toggle-debug');
+            const clearDebugBtn = document.getElementById('clear-debug');
+            const realTimeIndicator = document.getElementById('real-time-indicator');
+
+            // Variables
+            let selectedSessionId = null;
+            let isLiveSession = false;
+            let activeSessions = new Map();
+            let archivedSessions = [];
+            let speakerColors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+            let currentAnalysis = null;
+            let wsConnection = null;
+            let reconnectAttempts = 0;
+            let maxReconnectAttempts = 10;
+            let reconnectInterval = 2000; // Start with 2 seconds
+            let durationUpdateInterval = null;
+
+            // Create 10 noise level bars
+            for (let i = 0; i < 10; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'noise-bar';
+                bar.style.height = '3px';
+                noiseLevelBars.appendChild(bar);
+            }
+
+            // Debug functions
+            function toggleDebug() {
+                debugPanel.classList.toggle('visible');
+            }
+
+            function clearDebug() {
+                debugMessages.innerHTML = '';
+            }
+
+            function debugLog(message) {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString();
+
+                const msgElement = document.createElement('div');
+                msgElement.textContent = `${timeStr}: ${message}`;
+                debugMessages.appendChild(msgElement);
+
+                // Auto-scroll to bottom
+                debugMessages.scrollTop = debugMessages.scrollHeight;
+
+                // Limit number of messages
+                while (debugMessages.children.length > 100) {
+                    debugMessages.removeChild(debugMessages.firstChild);
+                }
+
+                console.log(`[DEBUG] ${message}`);
+            }
+
+            // Setup debug panel controls
+            toggleDebugBtn.addEventListener('click', toggleDebug);
+            clearDebugBtn.addEventListener('click', clearDebug);
+
+            // Connect to WebSocket with reconnection logic
+            function connectWebSocket() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}`;
+
+                debugLog(`Connecting to WebSocket: ${wsUrl}`);
+                wsConnection = new WebSocket(wsUrl);
+
+                wsConnection.onopen = function () {
+                    debugLog('WebSocket connected successfully');
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.classList.remove('bg-danger');
+                    connectionStatus.classList.add('bg-success');
+
+                    // Reset reconnect attempts on successful connection
+                    reconnectAttempts = 0;
+                    reconnectInterval = 2000;
+                };
+
+                wsConnection.onclose = function (event) {
+                    debugLog(`WebSocket disconnected (code: ${event.code})`);
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.classList.remove('bg-success');
+                    connectionStatus.classList.add('bg-danger');
+
+                    // Implement exponential backoff for reconnection
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        const delay = Math.min(30000, reconnectInterval * Math.pow(1.5, reconnectAttempts - 1));
+                        debugLog(`Reconnecting in ${Math.round(delay / 1000)} seconds (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`);
+
+                        setTimeout(connectWebSocket, delay);
+                    } else {
+                        debugLog('Maximum reconnection attempts reached. Please reload the page.');
+                    }
+                };
+
+                wsConnection.onerror = function (error) {
+                    debugLog('WebSocket error occurred');
+                    console.error('WebSocket error:', error);
+                };
+
+               wsConnection.onmessage = function (event) {
+                    try {
+                        const data = JSON.parse(event.data);
+
+                        // Log raw data if enabled
+                        if (window.showRawWebSocketData) {
+                            console.log("Raw WebSocket data:", data);
+                            debugLog(`Raw WS: ${JSON.stringify(data).substring(0, 100)}...`);
+                        }
+
+                        debugLog(`Received ${data.type} message for session ${data.sessionId || 'unknown'}`);
+
+                        // Special debug for speaker detection
+                        if (data.type === 'speakerDetection') {
+                            console.log("SPEAKER DETECTION MESSAGE:", data);
+                            debugLog(`Speaker detection message: detected=${data.detectedSpeakers || 'undefined'}`);
+                        }
+
+                        handleWebSocketMessage(data);
+                    } catch (error) {
+                        debugLog(`Error parsing WebSocket message: ${error.message}`);
+                        console.error('Error parsing WebSocket message:', error, event.data);
+                    }
+                };
+            }
+
+            // Subscribe to analysis updates for a specific session
+            function subscribeToAnalysis(sessionId) {
+                if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+                    wsConnection.send(JSON.stringify({
+                        type: 'subscribeAnalysis',
+                        sessionId: sessionId
+                    }));
+                    debugLog(`Subscribed to analysis for session ${sessionId}`);
+                }
+            }
+            function sendDebugMessage(sessionId) {
+                if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+                    // Send a test message to check if WebSocket is working
+                    wsConnection.send(JSON.stringify({
+                        type: 'debugRequest',
+                        sessionId: sessionId,
+                        message: 'Debug request from audio-analysis dashboard'
+                    }));
+                    debugLog(`Sent debug request for session ${sessionId}`);
+                } else {
+                    debugLog('Cannot send debug message: WebSocket not connected');
+                }
+            }
+            function manualSpeakerUpdate(count) {
+                updateSpeakerCount(count, 0.8);
+                debugLog(`Manually updated speaker count to ${count}`);
+
+                // Create dummy clusters for visualization
+                const dummyClusters = [];
+                for (let i = 0; i < count; i++) {
+                    dummyClusters.push({
+                        speakerId: i + 1,
+                        speakingTime: 10 + (i * 5),
+                        confidence: 0.7 + (i * 0.05),
+                        segments: []
+                    });
+                }
+
+                updateSpeakerVisualization(dummyClusters);
+            }
+
+            // Format bytes to human-readable format
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            // Format date to human-readable format
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString();
+            }
+
+            // Format duration in seconds to MM:SS format
+            function formatDuration(seconds) {
+                if (!seconds && seconds !== 0) return '-';
+
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            // Handle WebSocket messages
+            function handleWebSocketMessage(data) {
+                switch (data.type) {
+                    case 'sessionList':
+                        handleSessionList(data.sessions);
+                        break;
+                    case 'sessionStart':
+                        handleSessionStart(data);
+                        break;
+                    case 'sessionEnd':
+                        handleSessionEnd(data);
+                        break;
+                    case 'chunkReceived':
+                        handleChunkReceived(data);
+                        break;
+                    case 'speakerDetection':
+                        handleSpeakerDetection(data);
+                        break;
+                    case 'detectionStart':
+                        handleDetectionStart(data);
+                        break;
+                    case 'detectionEnd':
+                        handleDetectionEnd(data);
+                        break;
+                    default:
+                        debugLog(`Unknown message type: ${data.type}`);
+                }
+            }
+
+            // Handle session list
+            function handleSessionList(sessions) {
+                // Clear the session list
+                sessionList.innerHTML = '';
+                activeSessions.clear();
+
+                if (!sessions || sessions.length === 0) {
+                    sessionList.innerHTML = `
+                        <div class="list-group-item text-center py-4">
+                          <p class="m-0">No active sessions</p>
+                        </div>
+                      `;
+                    return;
+                }
+
+                // Add active sessions to the list
+                sessions.forEach(session => {
+                    activeSessions.set(session.id, session);
+                    addSessionToList(session, true);
+                });
+
+                // Load archived sessions
+                loadArchivedSessions();
+            }
+
+
+            function addDebugControls() {
+                const debugControlsDiv = document.createElement('div');
+                debugControlsDiv.className = 'card mb-3';
+                debugControlsDiv.innerHTML = `
+        <div class="card-header bg-dark text-white">Debug Controls</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Test Speaker Count:</label>
+                <div class="input-group">
+                    <input type="number" id="debug-speaker-count" class="form-control" min="0" max="10" value="2">
+                    <button id="debug-update-count" class="btn btn-primary">Update</button>
+                </div>
+            </div>
+            <div class="mb-3">
+                <button id="debug-send-ws" class="btn btn-secondary">Send Debug WS Message</button>
+                <button id="debug-refresh-status" class="btn btn-info ms-2">Refresh Status</button>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="debug-show-raw">
+                <label class="form-check-label" for="debug-show-raw">Show Raw WebSocket Data</label>
+            </div>
+        </div>
+    `;
+
+                // Add debug controls right after the session list
+                const sessionListCard = document.querySelector('.col-md-4 .card');
+                sessionListCard.parentNode.insertBefore(debugControlsDiv, sessionListCard.nextSibling);
+
+                // Connect event handlers
+                document.getElementById('debug-update-count').addEventListener('click', () => {
+                    const count = parseInt(document.getElementById('debug-speaker-count').value);
+                    manualSpeakerUpdate(count);
+                });
+
+                document.getElementById('debug-send-ws').addEventListener('click', () => {
+                    sendDebugMessage(selectedSessionId);
+                });
+
+                document.getElementById('debug-refresh-status').addEventListener('click', () => {
+                    if (selectedSessionId) {
+                        loadDetectionStatus(selectedSessionId);
+                        debugLog(`Manually refreshed detection status for ${selectedSessionId}`);
+                    } else {
+                        debugLog('No session selected');
+                    }
+                });
+
+                document.getElementById('debug-show-raw').addEventListener('change', (e) => {
+                    window.showRawWebSocketData = e.target.checked;
+                    debugLog(`Show raw WebSocket data: ${window.showRawWebSocketData}`);
+                });
+            }
+            // Load archived sessions
+            function loadArchivedSessions() {
+                fetch('/api/sos/archived-sessions')
+                    .then(response => response.json())
+                    .then(data => {
+                        archivedSessions = data.sessions || [];
+
+                        // Add archived sessions to the list
+                        archivedSessions.forEach(session => {
+                            // Only add if not already active
+                            if (!activeSessions.has(session.id)) {
+                                addSessionToList(session, false);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        debugLog('Error loading archived sessions: ' + error.message);
+                        console.error('Error loading archived sessions:', error);
+                    });
+            }
+
+            // Add a session to the list
+            function addSessionToList(session, isActive) {
+                const sessionItem = document.createElement('div');
+                sessionItem.className = `list-group-item session-card ${selectedSessionId === session.id ? 'active' : ''}`;
+                sessionItem.dataset.sessionId = session.id;
+
+                const startTime = new Date(session.startTime);
+                const duration = isActive
+                    ? ((new Date() - startTime) / 1000)
+                    : (session.duration || 0);
+
+                let analysisHtml = '';
+                if (session.currentSpeakerCount || session.detectedSpeakers) {
+                    const speakerCount = session.currentSpeakerCount || session.detectedSpeakers || 0;
+                    analysisHtml = `
+                        <div class="d-flex align-items-center mt-1">
+                          <small class="text-muted me-2">Speakers:</small>
+                          <span class="badge bg-primary">${speakerCount}</span>
+                        </div>
+                      `;
+                }
+
+                // Clean session ID for display
+                const shortId = session.id.substring(0, 8);
+
+                sessionItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <h6 class="mb-1">${shortId}...</h6>
+                          <small class="text-muted">${formatDate(session.startTime)}</small>
+                          ${isActive ? '<span class="badge bg-danger ms-2">Live</span>' : ''}
+                        </div>
+                        <span class="badge bg-secondary">${formatBytes(session.bytesReceived || 0)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-muted">Duration: ${formatDuration(duration)}</small>
+                        <small class="text-muted">Device: ${session.deviceId || 'unknown'}</small>
+                    </div>
+                    ${analysisHtml}
+                `;
+
+                sessionItem.addEventListener('click', () => {
+                    selectSession(session.id, isActive);
+                });
+
+                sessionList.appendChild(sessionItem);
+            }
+
+            // Select a session
+            function selectSession(sessionId, isLive) {
+                // Clear any existing duration update interval
+                if (durationUpdateInterval) {
+                    clearInterval(durationUpdateInterval);
+                    durationUpdateInterval = null;
+                }
+
+                // Update selected session
+                selectedSessionId = sessionId;
+                isLiveSession = isLive;
+
+                // Update UI
+                document.querySelectorAll('.session-card').forEach(item => {
+                    if (item.dataset.sessionId === sessionId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                // Show analysis container
+                noSessionSelected.classList.add('d-none');
+                analysisContainer.classList.remove('d-none');
+
+                // Show/hide live badge and real-time indicator
+                if (isLive) {
+                    liveBadge.classList.remove('d-none');
+                    realTimeIndicator.classList.remove('d-none');
+
+                    // Subscribe to analysis updates for this session
+                    subscribeToAnalysis(sessionId);
+                } else {
+                    liveBadge.classList.add('d-none');
+                    realTimeIndicator.classList.add('d-none');
+                }
+
+                // Update session info
+                sessionIdBadge.textContent = sessionId.substring(0, 8) + '...';
+
+                // Load session details
+                loadSessionDetails(sessionId);
+            }
+
+            // Load session details
+            function loadSessionDetails(sessionId) {
+                fetch(`/api/sos/session/${sessionId}`)
+                    .then(response => response.json())
+                    .then(session => {
+                        updateSessionInfo(session);
+
+                        if (session.status === 'archived' && session.hasAudio) {
+                            setupAudioPlayer(sessionId);
+                            downloadLinks.classList.remove('d-none');
+                            downloadOriginal.href = `/api/sos/download/${sessionId}`;
+                        } else {
+                            downloadLinks.classList.add('d-none');
+                            audioPlayer.src = '';
+                        }
+
+                        // Load detection status
+                        loadDetectionStatus(sessionId);
+                    })
+                    .catch(error => {
+                        debugLog('Error loading session details: ' + error.message);
+                        console.error('Error loading session details:', error);
+                    });
+            }
+
+            // Load detection status
+            function loadDetectionStatus(sessionId) {
+                fetch(`/api/sos/detection-status/${sessionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'no_detection') {
+                            updateSpeakerCount(0, 0);
+                            return;
+                        }
+
+                        // Update speaker count and confidence
+                        updateSpeakerCount(
+                            data.detectedSpeakers || 0,
+                            data.confidence || 0
+                        );
+
+                        // Load detailed speaker information if available
+                        if (data.detailedResults) {
+                            updateSpeakerVisualization(data.detailedResults.speakerClusters || []);
+                        } else if (data.status === 'active') {
+                            // For active sessions, try to load timeline data
+                            fetch(`/api/sos/speaker-timeline/${sessionId}`)
+                                .then(response => response.json())
+                                .then(timelineData => {
+                                    if (timelineData.clusters) {
+                                        updateSpeakerVisualization(timelineData.clusters);
+                                    }
+                                })
+                                .catch(error => {
+                                    debugLog('Error loading speaker timeline: ' + error.message);
+                                });
+                        }
+                    })
+                    .catch(error => {
+                        debugLog('Error loading detection status: ' + error.message);
+                        console.error('Error loading detection status:', error);
+                    });
+            }
+
+            // Update session info
+            function updateSessionInfo(session) {
+                sessionStartTime.textContent = formatDate(session.startTime);
+                sessionDeviceId.textContent = session.deviceId || 'unknown';
+
+                if (session.status === 'active') {
+                    const duration = (new Date() - new Date(session.startTime)) / 1000;
+                    sessionDuration.textContent = formatDuration(duration);
+                    sessionDataSize.textContent = formatBytes(session.bytesReceived || 0);
+                    sessionStatus.textContent = 'Active';
+                    sessionStatus.className = 'badge bg-success';
+
+                    // Update duration every second for live sessions
+                    durationUpdateInterval = setInterval(() => {
+                        const newDuration = (new Date() - new Date(session.startTime)) / 1000;
+                        sessionDuration.textContent = formatDuration(newDuration);
+                    }, 1000);
+                } else {
+                    sessionDuration.textContent = formatDuration(session.duration);
+                    sessionDataSize.textContent = formatBytes(session.bytesReceived || 0);
+                    sessionStatus.textContent = 'Archived';
+                    sessionStatus.className = 'badge bg-secondary';
+                }
+            }
+
+            // Setup audio player
+            function setupAudioPlayer(sessionId) {
+                // Set audio source
+                audioPlayer.src = `/api/sos/audio/${sessionId}`;
+                audioPlayer.load();
+            }
+
+            // Update speaker count and confidence display
+            function updateSpeakerCount(count, confidence) {
+                speakerCount.textContent = count;
+
+                // Update confidence display
+                const confidencePercent = Math.round(confidence * 100);
+                confidenceIndicator.textContent = `${confidencePercent}%`;
+
+                // Set confidence indicator color based on confidence level
+                if (confidencePercent < 40) {
+                    confidenceIndicator.className = 'confidence-badge bg-danger';
+                } else if (confidencePercent < 70) {
+                    confidenceIndicator.className = 'confidence-badge bg-warning';
+                } else {
+                    confidenceIndicator.className = 'confidence-badge bg-success';
+                }
+            }
+
+            // Update speaker visualization
+            function updateSpeakerVisualization(clusters) {
+                // Clear existing visualization
+                speakerVisualization.innerHTML = '';
+
+                if (!clusters || clusters.length === 0) {
+                    speakerVisualization.innerHTML = `
+                        <div class="text-center py-3 text-muted">
+                            No speakers detected yet
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Calculate total speaking time for percentage calculations
+                const totalSpeakingTime = clusters.reduce((sum, cluster) => sum + (cluster.speakingTime || 0), 0);
+
+                // Add a speaker row for each cluster
+                clusters.forEach((cluster, index) => {
+                    const speakerId = cluster.speakerId || (index + 1);
+                    const color = speakerColors[index % speakerColors.length];
+                    const speakingTimeText = formatDuration(cluster.speakingTime || 0);
+                    const speakingPercentage = totalSpeakingTime > 0
+                        ? Math.round((cluster.speakingTime / totalSpeakingTime) * 100)
+                        : 0;
+
+                    const speakerRow = document.createElement('div');
+                    speakerRow.className = 'speaker-row';
+                    speakerRow.innerHTML = `
+                        <div class="speaker-icon" style="background-color: ${color};">
+                            ${speakerId}
+                        </div>
+                        <div class="speaker-details">
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Speaker ${speakerId}</strong></span>
+                                <span>${speakingTimeText} (${speakingPercentage}%)</span>
+                            </div>
+                            <div class="speaker-time-bar">
+                                <div class="speaker-time-fill" style="width: ${speakingPercentage}%; background-color: ${color};"></div>
+                            </div>
+                        </div>
+                    `;
+
+                    speakerVisualization.appendChild(speakerRow);
+                });
+
+                // Also update the timeline
+                updateTimeline(clusters);
+            }
+
+            // Update timeline visualization
+            function updateTimeline(clusters) {
+                // Clear existing timeline segments
+                const existingSegments = timelineContainer.querySelectorAll('.timeline-segment');
+                existingSegments.forEach(segment => segment.remove());
+
+                // Get timeline segments from clusters
+                let allSegments = [];
+                let maxEndTime = 0;
+
+                clusters.forEach(cluster => {
+                    if (cluster.segments) {
+                        cluster.segments.forEach(segment => {
+                            allSegments.push({
+                                speakerId: cluster.speakerId,
+                                startTime: segment.startTime,
+                                endTime: segment.endTime
+                            });
+
+                            if (segment.endTime > maxEndTime) {
+                                maxEndTime = segment.endTime;
+                            }
+                        });
+                    }
+                });
+
+                if (allSegments.length === 0) {
+                    timelineContainer.innerHTML = `
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <p class="text-muted">No timeline data available</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Create time scale markers
+                timelineScale.innerHTML = '';
+                const scaleMarkerCount = 6;
+                const duration = maxEndTime || 60; // Default to 60s if no segments
+
+                for (let i = 0; i < scaleMarkerCount; i++) {
+                    const marker = document.createElement('div');
+                    const seconds = Math.round((i / (scaleMarkerCount - 1)) * duration);
+                    marker.textContent = formatDuration(seconds);
+                    timelineScale.appendChild(marker);
+                }
+
+                // Create timeline segments
+                allSegments.forEach(segment => {
+                    const startPercent = (segment.startTime / duration) * 100;
+                    const widthPercent = ((segment.endTime - segment.startTime) / duration) * 100;
+                    const speakerIndex = (segment.speakerId || 1) - 1;
+                    const top = 10 + (speakerIndex * 40); // 40px spacing between speakers
+
+                    const segmentDiv = document.createElement('div');
+                    segmentDiv.className = 'timeline-segment';
+                    segmentDiv.style.left = `${startPercent}%`;
+                    segmentDiv.style.width = `${widthPercent}%`;
+                    segmentDiv.style.top = `${top}px`;
+                    segmentDiv.style.backgroundColor = speakerColors[speakerIndex % speakerColors.length];
+                    segmentDiv.title = `Speaker ${segment.speakerId}: ${segment.startTime.toFixed(1)}s - ${segment.endTime.toFixed(1)}s`;
+
+                    timelineContainer.appendChild(segmentDiv);
+                });
+            }
+
+            // Handle speaker detection message
+       function handleSpeakerDetection(data) {
+                // Debug the incoming data
+                console.log("Speaker detection data received:", data);
+                debugLog(`Speaker detection raw data: ${JSON.stringify(data)}`);
+
+                // Skip if this isn't for the selected session
+                if (data.sessionId !== selectedSessionId) {
+                    debugLog(`Ignoring speaker detection for non-selected session: ${data.sessionId}`);
+                    return;
+                }
+
+                let speakerCount = 0;
+                let confidence = 0;
+
+                // Try to extract speaker count from all possible locations in the message
+                if (typeof data.detectedSpeakers === 'number') {
+                    speakerCount = data.detectedSpeakers;
+                    confidence = data.confidence || 0;
+                    debugLog(`Found speaker count directly in data: ${speakerCount}`);
+                } else if (data.data && typeof data.data.detectedSpeakers === 'number') {
+                    speakerCount = data.data.detectedSpeakers;
+                    confidence = data.data.confidence || 0;
+                    debugLog(`Found speaker count in data.data: ${speakerCount}`);
+                } else {
+                    // Try parsing all properties to find speaker count
+                    for (const key in data) {
+                        if (typeof data[key] === 'object' && data[key] !== null) {
+                            if (typeof data[key].detectedSpeakers === 'number') {
+                                speakerCount = data[key].detectedSpeakers;
+                                confidence = data[key].confidence || 0;
+                                debugLog(`Found speaker count in data.${key}: ${speakerCount}`);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Force an update even if count is 0 to make sure display is working
+                debugLog(`Updating speaker count to: ${speakerCount} (confidence: ${confidence})`);
+                updateSpeakerCount(speakerCount, confidence);
+
+                // Update speaker visualization if cluster info is available
+                if (data.clusters) {
+                    updateSpeakerVisualization(data.clusters);
+                    debugLog(`Updated speaker visualization with ${data.clusters.length} clusters`);
+                }
+
+                // Update session list item
+                updateSessionListItem(data.sessionId, speakerCount);
+
+                // Store this detection in the session object
+                const session = activeSessions.get(data.sessionId);
+                if (session) {
+                    session.currentSpeakerCount = speakerCount;
+                    session.detectionConfidence = confidence;
+                    debugLog(`Updated session object with speaker count: ${speakerCount}`);
+                }
+            }
+            // Update session list item with speaker count
+            function updateSessionListItem(sessionId, speakerCount) {
+                const sessionItem = document.querySelector(`.session-card[data-sessionid="${sessionId}"]`);
+                if (!sessionItem) return;
+
+                let speakerBadge = sessionItem.querySelector('.badge.bg-primary');
+
+                if (!speakerBadge) {
+                    const analysisDiv = document.createElement('div');
+                    analysisDiv.className = 'd-flex align-items-center mt-1';
+                    analysisDiv.innerHTML = `
+                        <small class="text-muted me-2">Speakers:</small>
+                        <span class="badge bg-primary">${speakerCount}</span>
+                    `;
+                    sessionItem.appendChild(analysisDiv);
+                } else {
+                    speakerBadge.textContent = speakerCount;
+                }
+            }
+
+            // Handle detection start message
+            function handleDetectionStart(data) {
+                debugLog(`Speaker detection started for session ${data.sessionId}`);
+
+                if (data.sessionId === selectedSessionId) {
+                    realTimeIndicator.classList.remove('d-none');
+                }
+            }
+
+            // Handle detection end message
+            function handleDetectionEnd(data) {
+                debugLog(`Speaker detection ended for session ${data.sessionId}`);
+
+                if (data.sessionId === selectedSessionId) {
+                    realTimeIndicator.classList.add('d-none');
+
+                    // Update final speaker count
+                    updateSpeakerCount(data.detectedSpeakers || 0, data.confidence || 0);
+                }
+            }
+
+            // Handle session start message
+            function handleSessionStart(data) {
+                // Add to active sessions
+                activeSessions.set(data.sessionId, {
+                    id: data.sessionId,
+                    startTime: data.startTime,
+                    type: data.type,
+                    deviceId: data.deviceId,
+                    bytesReceived: 0
+                });
+
+                // Add to UI
+                addSessionToList({
+                    id: data.sessionId,
+                    startTime: data.startTime,
+                    type: data.type,
+                    deviceId: data.deviceId,
+                    bytesReceived: 0
+                }, true);
+
+                debugLog(`New session started: ${data.sessionId}`);
+            }
+
+            // Handle session end message
+            function handleSessionEnd(data) {
+                debugLog(`Session ended: ${data.sessionId}`);
+
+                // Remove from active sessions
+                activeSessions.delete(data.sessionId);
+
+                // Refresh session list to show as archived
+                loadArchivedSessions();
+
+                // If this was the selected session, update UI
+                if (selectedSessionId === data.sessionId) {
+                    isLiveSession = false;
+                    liveBadge.classList.add('d-none');
+                    realTimeIndicator.classList.add('d-none');
+
+                    // Clear duration update interval
+                    if (durationUpdateInterval) {
+                        clearInterval(durationUpdateInterval);
+                        durationUpdateInterval = null;
+                    }
+
+                    // Reload session details
+                    loadSessionDetails(data.sessionId);
+                }
+            }
+
+            // Handle chunk received message
+            function handleChunkReceived(data) {
+                // Update session data size
+                const session = activeSessions.get(data.sessionId);
+                if (session) {
+                    session.bytesReceived = data.totalBytes;
+
+                    // Update UI if this is the selected session
+                    if (selectedSessionId === data.sessionId) {
+                        sessionDataSize.textContent = formatBytes(data.totalBytes);
+                    }
+
+                    // Update session list item
+                    const sessionItem = document.querySelector(`.session-card[data-sessionid="${data.sessionId}"]`);
+                    if (sessionItem) {
+                        const bytesSpan = sessionItem.querySelector('.badge.bg-secondary');
+                        if (bytesSpan) {
+                            bytesSpan.textContent = formatBytes(data.totalBytes);
+                        }
+                    }
+                }
+            }
+
+            // Initialize noise level display
+            function initializeNoiseLevelDisplay() {
+                noiseLevelValue.textContent = '0%';
+
+                const bars = noiseLevelBars.querySelectorAll('.noise-bar');
+                bars.forEach(bar => {
+                    bar.style.height = '10%';
+                    bar.style.backgroundColor = '#e9ecef';
+                });
+            }
+
+            // Set up noise level simulation for demo
+            function simulateNoiseLevel() {
+                // Only for live sessions
+                if (!isLiveSession) return;
+
+                // Simulate random noise level changes
+                const noiseLevel = Math.random();
+                const noiseLevelPercent = Math.round(noiseLevel * 100);
+                noiseLevelValue.textContent = `${noiseLevelPercent}%`;
+
+                // Update bars
+                const bars = noiseLevelBars.querySelectorAll('.noise-bar');
+                const barCount = Math.round(noiseLevel * 10);
+
+                bars.forEach((bar, index) => {
+                    if (index < barCount) {
+                        const heightPercentage = 30 + ((index / 10) * 70);
+                        bar.style.height = `${heightPercentage}%`;
+
+                        // Color based on index
+                        if (index < 3) {
+                            bar.style.backgroundColor = '#28a745'; // Green
+                        } else if (index < 7) {
+                            bar.style.backgroundColor = '#ffc107'; // Yellow
+                        } else {
+                            bar.style.backgroundColor = '#dc3545'; // Red
+                        }
+                    } else {
+                        bar.style.height = '10%';
+                        bar.style.backgroundColor = '#e9ecef';
+                    }
+                });
+
+                // Simulate quality as well
+                const quality = 30 + Math.round(noiseLevel * 70);
+                qualityMeterFill.style.width = `${quality}%`;
+
+                if (quality < 40) {
+                    qualityMeterFill.className = 'quality-fill bg-danger';
+                    qualityDescription.textContent = 'Poor recording quality';
+                } else if (quality < 70) {
+                    qualityMeterFill.className = 'quality-fill bg-warning';
+                    qualityDescription.textContent = 'Average recording quality';
+                } else {
+                    qualityMeterFill.className = 'quality-fill bg-success';
+                    qualityDescription.textContent = 'Good recording quality';
+                }
+            }
+
+            // Initialize
+            connectWebSocket();
+            addDebugControls();
+            initializeNoiseLevelDisplay();
+
+            // For demo purposes, simulate noise level changes
+            setInterval(simulateNoiseLevel, 2000);
+        });
+                    </script>
+</body>
+
+</html>

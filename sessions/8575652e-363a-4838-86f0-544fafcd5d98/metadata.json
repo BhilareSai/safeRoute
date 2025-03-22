@@ -1,0 +1,12 @@
+{
+  "id": "8575652e-363a-4838-86f0-544fafcd5d98",
+  "startTime": "2025-03-21T20:40:19.134Z",
+  "type": "audio",
+  "deviceId": "V2307",
+  "format": "mp3",
+  "audioConfig": {
+    "sampleRate": 16000,
+    "format": "s16le",
+    "channels": 1
+  }
+}

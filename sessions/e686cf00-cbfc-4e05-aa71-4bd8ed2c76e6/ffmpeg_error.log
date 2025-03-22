@@ -1,0 +1,693 @@
+ffmpeg version 6.0 Copyright (c) 2000-2023 the FFmpeg developers
+  built with Apple clang version 13.1.6 (clang-1316.0.21.2.5)
+  configuration: --prefix=/Volumes/tempdisk/sw --extra-cflags=-fno-stack-check --arch=arm64 --cc=/usr/bin/clang --enable-gpl --enable-libvmaf --enable-libbluray --enable-libopenjpeg --enable-libopus --enable-libmp3lame --enable-libx264 --enable-libx265 --enable-libvpx --enable-libwebp --enable-libass --enable-libfreetype --enable-fontconfig --enable-libtheora --enable-libvorbis --enable-libsnappy --enable-libaom --enable-libvidstab --enable-libzimg --enable-libsvtav1 --enable-libkvazaar --enable-version3 --pkg-config-flags=--static --enable-ffplay --enable-postproc --enable-nonfree --enable-neon --enable-runtime-cpudetect --disable-indev=qtkit --disable-indev=x11grab_xcb
+  libavutil      58.  2.100 / 58.  2.100
+  libavcodec     60.  3.100 / 60.  3.100
+  libavformat    60.  3.100 / 60.  3.100
+  libavdevice    60.  1.100 / 60.  1.100
+  libavfilter     9.  3.100 /  9.  3.100
+  libswscale      7.  1.100 /  7.  1.100
+  libswresample   4. 10.100 /  4. 10.100
+  libpostproc    57.  1.100 / 57.  1.100
+[aac @ 0x123105630] Format aac detected only with low score of 1, misdetection possible!
+[aac @ 0x123105af0] Error decoding AAC frame header.
+[aac @ 0x123105af0] More than one AAC RDB per ADTS frame is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x123105af0] Assuming an incorrectly encoded 7.1 channel layout instead of a spec-compliant 7.1(wide) layout, use -strict 1 to decode according to the specification instead.
+[aac @ 0x123105af0] Multiple frames in a packet.
+[aac @ 0x123105af0] channel element 3.3 is not allocated
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of bands (29) exceeds limit (2).
+[aac @ 0x123105af0] Number of scalefactor bands in group (63) exceeds limit (41).
+[aac @ 0x123105af0] channel element 2.5 is not allocated
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of bands (25) exceeds limit (15).
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of scalefactor bands in group (55) exceeds limit (47).
+[aac @ 0x123105af0] Input buffer exhausted before END element found
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of scalefactor bands in group (62) exceeds limit (47).
+[aac @ 0x123105af0] channel element 2.7 is not allocated
+[aac @ 0x123105af0] channel element 3.10 is not allocated
+[aac @ 0x123105af0] channel element 3.7 is not allocated
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of bands (18) exceeds limit (6).
+[aac @ 0x123105af0] channel element 3.10 is not allocated
+[aac @ 0x123105af0] channel element 3.14 is not allocated
+[aac @ 0x123105af0] Error decoding AAC frame header.
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Gain control is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x123105af0] channel element 2.2 is not allocated
+[aac @ 0x123105af0] channel element 1.15 is not allocated
+[aac @ 0x123105af0] channel element 2.10 is not allocated
+[aac @ 0x123105af0] channel element 1.12 is not allocated
+[aac @ 0x123105af0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Prediction is not allowed in AAC-LC.
+[aac @ 0x123105af0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x123105af0] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x123105af0] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+[aac @ 0x123105af0] channel element 3.6 is not allocated
+[aac @ 0x123105af0] channel element 3.15 is not allocated
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] invalid band type
+[aac @ 0x123105af0] channel element 1.9 is not allocated
+[aac @ 0x123105af0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x123105af0] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x123105af0] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of bands (16) exceeds limit (7).
+[aac @ 0x123105af0] channel element 1.2 is not allocated
+[aac @ 0x123105af0] channel element 1.12 is not allocated
+[aac @ 0x123105af0] channel element 2.13 is not allocated
+[aac @ 0x123105af0] channel element 3.9 is not allocated
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] invalid band type
+[aac @ 0x123105af0] channel element 1.2 is not allocated
+[aac @ 0x123105af0] Number of scalefactor bands in group (41) exceeds limit (40).
+[aac @ 0x123105af0] Error decoding AAC frame header.
+[aac @ 0x123105af0] channel element 2.10 is not allocated
+[aac @ 0x123105af0] channel element 2.7 is not allocated
+[aac @ 0x123105af0] Dependent coupling is not supported together with LTP
+    Last message repeated 15 times
+[aac @ 0x123105af0] channel element 2.7 is not allocated
+[aac @ 0x123105af0] channel element 1.9 is not allocated
+[aac @ 0x123105af0] channel element 3.1 is not allocated
+[aac @ 0x123105af0] channel element 2.13 is not allocated
+[aac @ 0x123105af0] channel element 1.13 is not allocated
+[aac @ 0x123105af0] channel element 1.6 is not allocated
+[aac @ 0x123105af0] invalid band type
+[aac @ 0x123105af0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] Number of bands (39) exceeds limit (33).
+[aac @ 0x123105af0] Reserved bit set.
+[aac @ 0x123105af0] invalid band type
+[aac @ 0x123105af0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x123105af0] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x123105af0] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+[aac @ 0x123105630] Estimating duration from bitrate, this may be inaccurate
+[aac @ 0x123105630] Could not find codec parameters for stream 0 (Audio: aac (LC), 7.1, fltp, 1463 kb/s): unspecified sample rate
+Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options
+Input #0, aac, from '/Users/sai/Desktop/maps/sessions/e686cf00-cbfc-4e05-aa71-4bd8ed2c76e6/audio.temp.aac':
+  Duration: 00:00:04.90, bitrate: 1466 kb/s
+  Stream #0:0: Audio: aac (LC), 3.0, fltp, 1463 kb/s
+Stream mapping:
+  Stream #0:0 -> #0:0 (aac (native) -> mp3 (libmp3lame))
+Press [q] to stop, [?] for help
+[aac @ 0x121f0cd10] channel element 0.0 duplicate
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] More than one AAC RDB per ADTS frame is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] Assuming an incorrectly encoded 7.1 channel layout instead of a spec-compliant 7.1(wide) layout, use -strict 1 to decode according to the specification instead.
+[aac @ 0x121f0cd10] Multiple frames in a packet.
+[aac @ 0x121f0cd10] channel element 3.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (29) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (63) exceeds limit (41).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (25) exceeds limit (15).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (55) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Input buffer exhausted before END element found
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (62) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (18) exceeds limit (6).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.14 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Gain control is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] channel element 2.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Prediction is not allowed in AAC-LC.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] channel element 3.6 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (7).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (41) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] channel element 2.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 15 times
+[aac @ 0x121f0cd10] channel element 2.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.1 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.6 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (39) exceeds limit (33).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] channel element 2.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 15 times
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] channel element 2.14 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (11) exceeds limit (5).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (31) exceeds limit (15).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] channel element 3.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.0 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 15 times
+[aac @ 0x121f0cd10] channel element 1.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (39) exceeds limit (33).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (24) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (59) exceeds limit (39).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (17) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (9) exceeds limit (7).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Prediction is not allowed in AAC-LC.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (61) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 17 times
+[aac @ 0x121f0cd10] channel element 3.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (17) exceeds limit (11).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (45) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (63) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.0 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (57) exceeds limit (43).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.13 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.8 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] decode_pce: Input buffer exhausted before END element found
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (5).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (49) exceeds limit (41).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (54) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (6).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Pulse tool not allowed in eight short sequence.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.6 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (2) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (31) exceeds limit (10).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (49) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] channel element 2.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (63) exceeds limit (49).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (14) exceeds limit (8).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (3) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (9) exceeds limit (7).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (18) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] channel element 0.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] channel element 2.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (24) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (46) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (5) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] TYPE_FIL: Input buffer exhausted before END element found
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (24) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (57) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (49) exceeds limit (43).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (24) exceeds limit (5).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 21 times
+[aac @ 0x121f0cd10] channel element 3.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (25) exceeds limit (6).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (37) exceeds limit (27).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.6 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 21 times
+[aac @ 0x121f0cd10] channel element 2.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (24) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (36) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (26) exceeds limit (11).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.11 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 0.1 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (50) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 21 times
+[aac @ 0x121f0cd10] Number of bands (6) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (62) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (7) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 21 times
+[aac @ 0x121f0cd10] channel element 3.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (62) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.0 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (39) exceeds limit (34).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Prediction is not allowed in AAC-LC.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (28) exceeds limit (19).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] channel element 3.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] decode_pce: Input buffer exhausted before END element found
+Error while decoding stream #0:0: Operation not permitted
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (56) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (21) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (49) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (20) exceeds limit (8).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (8).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Too large remapped id is not implemented. Update your FFmpeg version to the newest one from Git. If the problem still occurs, it means that your file has a feature which has not been implemented.
+[aac @ 0x121f0cd10] If you want to help, upload a sample of this file to https://streams.videolan.org/upload/ and contact the ffmpeg-devel mailing list. (ffmpeg-devel@ffmpeg.org)
+Error while decoding stream #0:0: Not yet implemented in FFmpeg, patches welcome
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (9) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] decode_band_types: Input buffer exhausted before END element found
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (25) exceeds limit (12).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (23) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (10).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.7 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] invalid band type
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.8 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (15) exceeds limit (13).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] channel element 3.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Number of scalefactor bands in group (59) exceeds limit (40).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (8) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.2 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+    Last message repeated 1 times
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Prediction is not allowed in AAC-LC.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.11 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x121f0cd10] Prediction is not allowed in AAC-LC.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (30) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.14 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (13).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (21) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (10) exceeds limit (7).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Number of bands (31) exceeds limit (2).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (9) exceeds limit (6).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Input buffer exhausted before END element found
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Error decoding AAC frame header.
+Error while decoding stream #0:0: Error number -50531338 occurred
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Invalid Predictor Reset Group.
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.9 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.4 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (14) exceeds limit (12).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (21) exceeds limit (4).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.10 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] channel element 1.5 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Number of bands (16) exceeds limit (3).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 3.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 2.15 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.12 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (10) exceeds limit (9).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Dependent coupling is not supported together with LTP
+    Last message repeated 19 times
+[aac @ 0x121f0cd10] channel element 1.0 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (30) exceeds limit (29).
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] channel element 1.3 is not allocated
+Error while decoding stream #0:0: Invalid data found when processing input
+[aac @ 0x121f0cd10] An invalid frame was output by a decoder. This is a bug, please report it.
+Error while decoding stream #0:0: Internal bug, should not have happened
+[aac @ 0x121f0cd10] Reserved bit set.
+[aac @ 0x121f0cd10] Number of bands (28) exceeds limit (1).
+Error while decoding stream #0:0: Invalid data found when processing input
+Error while decoding stream #0:0: Resource temporarily unavailable
+    Last message repeated 105 times
+[aac @ 0x123105630] Packet corrupt (stream = 0, dts = NOPTS).
+/Users/sai/Desktop/maps/sessions/e686cf00-cbfc-4e05-aa71-4bd8ed2c76e6/audio.temp.aac: corrupt input packet in stream 0
+Error while decoding stream #0:0: Resource temporarily unavailable
+    Last message repeated 1 times
+[graph_0_in_0_0 @ 0x121e0ae00] Value inf for parameter 'time_base' out of range [0 - 2.14748e+09]
+    Last message repeated 1 times
+[graph_0_in_0_0 @ 0x121e0ae00] Error setting option time_base to value 1/0.
+[graph_0_in_0_0 @ 0x121e0ae00] Error applying generic filter options.
+Error reinitializing filters!
+Error while filtering: Result too large
+[aost#0:0/libmp3lame @ 0x121f0d8e0] Finishing stream without any data written to it.
+[graph_0_in_0_0 @ 0x123105f80] Value inf for parameter 'time_base' out of range [0 - 2.14748e+09]
+    Last message repeated 1 times
+[graph_0_in_0_0 @ 0x123105f80] Error setting option time_base to value 1/0.
+[graph_0_in_0_0 @ 0x123105f80] Error applying generic filter options.
+[aost#0:0/libmp3lame @ 0x121f0d8e0] Error configuring filter graph
+Conversion failed!

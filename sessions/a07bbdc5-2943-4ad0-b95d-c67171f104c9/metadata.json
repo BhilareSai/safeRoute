@@ -1,0 +1,12 @@
+{
+  "id": "a07bbdc5-2943-4ad0-b95d-c67171f104c9",
+  "startTime": "2025-03-22T01:00:03.533Z",
+  "type": "audio",
+  "deviceId": "V2307",
+  "location": null,
+  "format": "mp3",
+  "endTime": "2025-03-22T01:00:34.056Z",
+  "duration": 30.523,
+  "bytesReceived": 616960,
+  "conversionSuccess": true
+}

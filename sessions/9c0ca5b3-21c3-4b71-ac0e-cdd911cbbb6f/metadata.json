@@ -1,0 +1,12 @@
+{
+  "id": "9c0ca5b3-21c3-4b71-ac0e-cdd911cbbb6f",
+  "startTime": "2025-03-21T23:45:19.304Z",
+  "type": "audio",
+  "deviceId": "V2307",
+  "location": {
+    "latitude": 18.8942013,
+    "longitude": 73.176811,
+    "accuracy": 21.543
+  },
+  "format": "mp3"
+}

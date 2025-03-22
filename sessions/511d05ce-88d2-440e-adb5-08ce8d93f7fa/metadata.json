@@ -1,0 +1,16 @@
+{
+  "id": "511d05ce-88d2-440e-adb5-08ce8d93f7fa",
+  "startTime": "2025-03-21T20:39:40.208Z",
+  "type": "audio",
+  "deviceId": "V2307",
+  "format": "mp3",
+  "audioConfig": {
+    "sampleRate": 16000,
+    "format": "s16le",
+    "channels": 1
+  },
+  "endTime": "2025-03-21T20:40:10.250Z",
+  "duration": 30.042,
+  "bytesReceived": 960000,
+  "conversionSuccess": true
+}
