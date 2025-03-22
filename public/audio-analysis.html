@@ -530,24 +530,10 @@
                     console.error('WebSocket error:', error);
                 };
 
-               wsConnection.onmessage = function (event) {
+                wsConnection.onmessage = function (event) {
                     try {
                         const data = JSON.parse(event.data);
-
-                        // Log raw data if enabled
-                        if (window.showRawWebSocketData) {
-                            console.log("Raw WebSocket data:", data);
-                            debugLog(`Raw WS: ${JSON.stringify(data).substring(0, 100)}...`);
-                        }
-
                         debugLog(`Received ${data.type} message for session ${data.sessionId || 'unknown'}`);
-
-                        // Special debug for speaker detection
-                        if (data.type === 'speakerDetection') {
-                            console.log("SPEAKER DETECTION MESSAGE:", data);
-                            debugLog(`Speaker detection message: detected=${data.detectedSpeakers || 'undefined'}`);
-                        }
-
                         handleWebSocketMessage(data);
                     } catch (error) {
                         debugLog(`Error parsing WebSocket message: ${error.message}`);
@@ -680,65 +666,11 @@
                 loadArchivedSessions();
             }
 
-
-            function addDebugControls() {
-                const debugControlsDiv = document.createElement('div');
-                debugControlsDiv.className = 'card mb-3';
-                debugControlsDiv.innerHTML = `
-        <div class="card-header bg-dark text-white">Debug Controls</div>
-        <div class="card-body">
-            <div class="mb-3">
-                <label class="form-label">Test Speaker Count:</label>
-                <div class="input-group">
-                    <input type="number" id="debug-speaker-count" class="form-control" min="0" max="10" value="2">
-                    <button id="debug-update-count" class="btn btn-primary">Update</button>
-                </div>
-            </div>
-            <div class="mb-3">
-                <button id="debug-send-ws" class="btn btn-secondary">Send Debug WS Message</button>
-                <button id="debug-refresh-status" class="btn btn-info ms-2">Refresh Status</button>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="debug-show-raw">
-                <label class="form-check-label" for="debug-show-raw">Show Raw WebSocket Data</label>
-            </div>
-        </div>
-    `;
-
-                // Add debug controls right after the session list
-                const sessionListCard = document.querySelector('.col-md-4 .card');
-                sessionListCard.parentNode.insertBefore(debugControlsDiv, sessionListCard.nextSibling);
-
-                // Connect event handlers
-                document.getElementById('debug-update-count').addEventListener('click', () => {
-                    const count = parseInt(document.getElementById('debug-speaker-count').value);
-                    manualSpeakerUpdate(count);
-                });
-
-                document.getElementById('debug-send-ws').addEventListener('click', () => {
-                    sendDebugMessage(selectedSessionId);
-                });
-
-                document.getElementById('debug-refresh-status').addEventListener('click', () => {
-                    if (selectedSessionId) {
-                        loadDetectionStatus(selectedSessionId);
-                        debugLog(`Manually refreshed detection status for ${selectedSessionId}`);
-                    } else {
-                        debugLog('No session selected');
-                    }
-                });
-
-                document.getElementById('debug-show-raw').addEventListener('change', (e) => {
-                    window.showRawWebSocketData = e.target.checked;
-                    debugLog(`Show raw WebSocket data: ${window.showRawWebSocketData}`);
-                });
-            }
             // Load archived sessions
             function loadArchivedSessions() {
                 fetch('/api/sos/archived-sessions')
                     .then(response => response.json())
                     .then(data => {
-                        console.log("give ", data);  
                         archivedSessions = data.sessions || [];
 
                         // Add archived sessions to the list
@@ -746,7 +678,7 @@
                             // Only add if not already active
                             if (!activeSessions.has(session.id)) {
                                 addSessionToList(session, false);
-                            }   
+                            }
                         });
                     })
                     .catch(error => {
@@ -754,7 +686,6 @@
                         console.error('Error loading archived sessions:', error);
                     });
             }
-
 
             // Add a session to the list
             function addSessionToList(session, isActive) {
@@ -1313,7 +1244,6 @@
 
             // Initialize
             connectWebSocket();
-            addDebugControls();
             initializeNoiseLevelDisplay();
 
             // For demo purposes, simulate noise level changes
