@@ -1,0 +1,23 @@
+{
+  "id": "d17e95ea-b973-4d09-8e16-e1637913695e",
+  "startTime": "2025-03-22T03:06:39.421Z",
+  "type": "audio",
+  "deviceId": "V2307",
+  "location": {
+    "latitude": 18.8942015,
+    "longitude": 73.1768083,
+    "accuracy": 20.926
+  },
+  "format": "mp3",
+  "voiceDetection": {
+    "detectedSpeakers": 0,
+    "confidence": 0,
+    "completed": true,
+    "completedAt": "2025-03-22T03:07:09.972Z",
+    "service": "python"
+  },
+  "endTime": "2025-03-22T03:07:09.972Z",
+  "duration": 30.551,
+  "bytesReceived": 435200,
+  "conversionSuccess": true
+}

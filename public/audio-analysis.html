@@ -738,6 +738,7 @@
                 fetch('/api/sos/archived-sessions')
                     .then(response => response.json())
                     .then(data => {
+                        console.log("give ", data);  
                         archivedSessions = data.sessions || [];
 
                         // Add archived sessions to the list
@@ -745,7 +746,7 @@
                             // Only add if not already active
                             if (!activeSessions.has(session.id)) {
                                 addSessionToList(session, false);
-                            }
+                            }   
                         });
                     })
                     .catch(error => {
@@ -753,6 +754,7 @@
                         console.error('Error loading archived sessions:', error);
                     });
             }
+
 
             // Add a session to the list
             function addSessionToList(session, isActive) {

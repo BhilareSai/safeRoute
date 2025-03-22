@@ -31,7 +31,7 @@ class AudioBuffer extends Transform {
 
 // Configuration for the voice detection service
 const VOICE_DETECTION_URL =
-  process.env.VOICE_DETECTION_URL || "http://localhost:5000";
+  process.env.VOICE_DETECTION_URL || "http://127.0.0.1:4002";
 
 // Helper function to call the Python voice detection API
 async function callVoiceDetectionAPI(endpoint, method = "GET", data = null) {
@@ -93,25 +93,25 @@ router.post("/start", async (req, res) => {
 
     // The final MP3 file path
     const mp3FilePath = path.join(sessionDir, "audio.mp3");
-    // var result = await axios.post(
-    //   "https://womensafety-1-5znp.onrender.com/users/sendWelcomeMessage1",
-    //   {
-    //     latitude: location.latitude,
-    //     longitude: location.longitude,
-    //     longitude: 77.209,
-    //     url: "https://maps.googleapis.com/maps/api/streetview?size=600x400&location=19.04120,%2073.07794&key=AIzaSyAnFzm0egXHx7P7zBsOjC3NV01Wj3ZHgyo",
-    //     deviceName: device_id,
-    //     battery: 75,
-    //   },
-    //   {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization:
-    //         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MyMjIwMWY3MmNkOTBiYjAzYjhkYjciLCJ1c2VyTmFtZSI6Im1lc3NpIiwibW9iaWxlTnVtYmVyIjoiOTE2Nzc4NzMyNiIsImlhdCI6MTc0MDk0NzgwNiwiZXhwIjoxNzQzNTM5ODA2fQ.LD1eDGOODJBtaqKmKtBah3czSRItJ-vFBdhxf-0OcmE",
-    //     },
-    //   }
-    // );
-    // console.log("response from welcome message", result.data);
+    var result = await axios.post(
+      "https://womensafety-1-5znp.onrender.com/users/sendWelcomeMessage1",
+      {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        longitude: 77.209,
+        url: "https://maps.googleapis.com/maps/api/streetview?size=600x400&location=19.04120,%2073.07794&key=AIzaSyAnFzm0egXHx7P7zBsOjC3NV01Wj3ZHgyo",
+        deviceName: device_id,
+        battery: 75,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MyMjIwMWY3MmNkOTBiYjAzYjhkYjciLCJ1c2VyTmFtZSI6Im1lc3NpIiwibW9iaWxlTnVtYmVyIjoiOTE2Nzc4NzMyNiIsImlhdCI6MTc0MDk0NzgwNiwiZXhwIjoxNzQzNTM5ODA2fQ.LD1eDGOODJBtaqKmKtBah3czSRItJ-vFBdhxf-0OcmE",
+        },
+      }
+    );
+    console.log("response from welcome message", result.data);
     // Create session metadata
     const sessionInfo = {
       startTime: new Date().toISOString(),
@@ -166,6 +166,36 @@ router.post("/start", async (req, res) => {
       deviceId: sessionInfo.deviceId,
       location: sessionInfo.location,
     });
+    try {
+      const voiceDetectionResponse = await callVoiceDetectionAPI(
+        "start",
+        "POST",
+        {
+          session_id: sessionId,
+        }
+      );
+
+      // Store voice detection status in session info
+      sessionInfo.pythonVoiceDetection = {
+        active: true,
+        initialized: true,
+      };
+
+      console.log(
+        `Python voice detection initialized for session ${sessionId}:`,
+        voiceDetectionResponse
+      );
+    } catch (voiceError) {
+      console.error(
+        `Failed to initialize Python voice detection for session ${sessionId}:`,
+        voiceError
+      );
+      sessionInfo.pythonVoiceDetection = {
+        active: false,
+        initialized: false,
+        error: voiceError.message,
+      };
+    }
 
     return res.status(200).json({
       success: true,
@@ -216,6 +246,43 @@ router.post("/stream", async (req, res) => {
       chunkSize: audioData.length,
       totalBytes: session.bytesReceived,
     });
+
+    if (session.pythonVoiceDetection && session.pythonVoiceDetection.active) {
+      // Send in background without awaiting or blocking response
+      callVoiceDetectionAPI(`stream/${sessionId}`, "POST", audioData)
+        .then((response) => {
+          if (response.error) {
+            console.warn(
+              `Python voice detection warning for ${sessionId}:`,
+              response.error
+            );
+
+            // Track errors to disable if too many failures
+            if (!session.pythonVoiceDetection.errorCount) {
+              session.pythonVoiceDetection.errorCount = 1;
+            } else {
+              session.pythonVoiceDetection.errorCount++;
+
+              // Disable after repeated errors
+              if (session.pythonVoiceDetection.errorCount > 5) {
+                console.error(
+                  `Disabling Python voice detection for ${sessionId} due to repeated errors`
+                );
+                session.pythonVoiceDetection.active = false;
+              }
+            }
+          } else {
+            // Reset error count on success
+            session.pythonVoiceDetection.errorCount = 0;
+          }
+        })
+        .catch((err) => {
+          console.error(
+            `Error sending to Python voice detection for ${sessionId}:`,
+            err
+          );
+        });
+    }
 
     return res.status(200).end();
   } catch (error) {
@@ -422,6 +489,7 @@ async function convertAndroidAudioToMp3(session) {
 // End an SOS session
 // End an SOS session
 // End an SOS session
+// End an SOS session - using only Python voice detection
 router.post("/end", async (req, res) => {
   try {
     const { session_id } = req.body;
@@ -436,43 +504,31 @@ router.post("/end", async (req, res) => {
       return res.status(404).json({ error: "Session not found" });
     }
 
-    // Process voice detection finalization
-    if (req.voiceDetections && req.voiceDetections.has(session_id)) {
+    // Finalize Python voice detection if active
+    let voiceDetectionResults = null;
+    if (session.pythonVoiceDetection && session.pythonVoiceDetection.active) {
       try {
-        console.log(`[${session_id}] Finalizing voice detection`);
-        const detector = req.voiceDetections.get(session_id);
-        const result = detector.stop();
-
-        // Add voice detection results to session metadata
-        const sessionDir = path.join(req.storageDir, session_id);
-        const metadataPath = path.join(sessionDir, "metadata.json");
-
-        let metadata = {};
-        if (fs.existsSync(metadataPath)) {
-          metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
-          metadata.voiceDetection = {
-            detectedSpeakers: result.detectedSpeakers,
-            processedDuration: result.processedDuration,
-            confidence: result.confidence || 0.7,
-            completed: true,
-            completedAt: new Date().toISOString(),
-          };
-        }
-
-        // Broadcast final detection results
-        req.broadcastSessionUpdate("detectionEnd", session_id, {
-          timestamp: new Date().toISOString(),
-          detectedSpeakers: result.detectedSpeakers,
-          processedDuration: result.processedDuration,
-          confidence: result.confidence || 0.7,
+        // Call the Python voice detection API to end the session
+        console.log(
+          `Finalizing Python voice detection for session ${session_id}`
+        );
+        const response = await axios({
+          method: "POST",
+          url: `${VOICE_DETECTION_URL}/api/detection/end/${session_id}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
-        // Remove from active detections
-        req.voiceDetections.delete(session_id);
-      } catch (error) {
+        voiceDetectionResults = response.data;
+        console.log(
+          `Python voice detection results for session ${session_id}:`,
+          voiceDetectionResults
+        );
+      } catch (voiceError) {
         console.error(
-          `[${session_id}] Error finalizing voice detection:`,
-          error
+          `Error finalizing Python voice detection for session ${session_id}:`,
+          voiceError
         );
       }
     }
@@ -526,6 +582,17 @@ router.post("/end", async (req, res) => {
       };
     }
 
+    // Add Python voice detection results to metadata
+    if (voiceDetectionResults && !voiceDetectionResults.error) {
+      metadata.voiceDetection = {
+        detectedSpeakers: voiceDetectionResults.speakers || 0,
+        confidence: voiceDetectionResults.confidence || 0,
+        completed: true,
+        completedAt: new Date().toISOString(),
+        service: "python",
+      };
+    }
+
     metadata.endTime = new Date().toISOString();
     metadata.duration =
       (new Date(metadata.endTime) - new Date(metadata.startTime)) / 1000;
@@ -549,6 +616,13 @@ router.post("/end", async (req, res) => {
       conversionSuccess: conversionSuccess,
       mp3Exists: mp3Exists,
       mp3Size: mp3Size,
+      voiceDetection:
+        voiceDetectionResults && !voiceDetectionResults.error
+          ? {
+              speakers: voiceDetectionResults.speakers,
+              confidence: voiceDetectionResults.confidence,
+            }
+          : null,
     });
 
     // Remove session from active sessions
@@ -562,6 +636,13 @@ router.post("/end", async (req, res) => {
       conversionSuccess: conversionSuccess,
       mp3Exists: mp3Exists,
       mp3Size: mp3Size,
+      voiceDetection:
+        voiceDetectionResults && !voiceDetectionResults.error
+          ? {
+              speakers: voiceDetectionResults.speakers,
+              confidence: voiceDetectionResults.confidence,
+            }
+          : null,
     });
   } catch (error) {
     console.error("Error ending session:", error);
@@ -738,6 +819,7 @@ router.get("/download/:sessionId", (req, res) => {
 
 // Get all archived sessions
 router.get("/archived-sessions", (req, res) => {
+  console.log("hellofrom archived");
   try {
     const sessionDirs = fs.readdirSync(req.storageDir);
     const archivedSessions = [];
